@@ -10,7 +10,7 @@ export default function HomePage() {
             This card demonstrates daisyUI + Tailwind + Animate.css with beautiful colors.
           </p>
           <div className="card-actions justify-end">
-            <button className="btn btn-primary animate__animated animate__pulse hover:scale-105 transition-transform duration-300">
+            <button className="btn btn-outline btn-white animate__animated animate__headShake hover:scale-105 transition-transform duration-300">
               Click Me
             </button>
           </div>
