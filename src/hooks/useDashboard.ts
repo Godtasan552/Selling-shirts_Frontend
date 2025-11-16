@@ -66,12 +66,33 @@ export interface DashboardStats {
 }
 
 // Orders
+export interface OrderItem {
+  productId: string;
+  name: string;
+  size: string;
+  color?: string;
+  sku: string;
+  price: number;
+  quantity: number;
+}
+
 export interface Order {
   _id: string;
   customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  customerAddress: string;
+  note?: string;
+  items: OrderItem[];
+  totalProductPrice: number;
+  shippingCost: number;
   totalPrice: number;
-  status: string;
+  status: "pending_payment" | "verifying_payment" | "paid" | "shipped" | "delivered" | "cancelled";
+  paymentSlip?: string;
+  approvedBy?: string;
+  paidAt?: Date;
   createdAt: string;
+  updatedAt?: string;
 }
 
 // Users
@@ -145,16 +166,32 @@ export function useDashboard(): UseDashboardReturn {
         }));
         setPackages(packageList);
 
-        // Fetch orders
-        const ordersResponse = await fetch(`${apiUrl}/api/orders`, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-
+        // Fetch orders - ดึงจาก admin endpoint
         let ordersList: Order[] = [];
-        if (ordersResponse.ok) {
-          const ordersData = await ordersResponse.json();
-          ordersList = Array.isArray(ordersData.data) ? ordersData.data : [];
-          setOrders(ordersList.slice(0, 5));
+        let totalOrdersCount = 0;
+        let pendingOrdersCount = 0;
+        let verifyingOrdersCount = 0;
+
+        try {
+          const ordersResponse = await fetch(`${apiUrl}/api/admin/orders/all`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+
+          if (ordersResponse.ok) {
+            const ordersData = await ordersResponse.json();
+            ordersList = Array.isArray(ordersData.orders) ? ordersData.orders : [];
+            totalOrdersCount = ordersData.count || ordersList.length;
+
+            // นับจำนวนตามสถานะ
+            verifyingOrdersCount = ordersList.filter(o => o.status === 'verifying_payment').length;
+            pendingOrdersCount = ordersList.filter(o => o.status === 'pending_payment').length;
+
+            setOrders(ordersList.slice(0, 10));
+          } else {
+            console.warn('Failed to fetch orders:', ordersResponse.status);
+          }
+        } catch (err) {
+          console.warn('Error fetching orders:', err);
         }
 
         // Fetch normal users
@@ -180,6 +217,8 @@ export function useDashboard(): UseDashboardReturn {
           googleUsers = usersList.filter(u => u.googleId).length;
 
           setUsers(usersList.slice(0, 5));
+        } else {
+          console.warn('Failed to fetch users:', usersResponse.status);
         }
 
         // Fetch admin users
@@ -200,6 +239,8 @@ export function useDashboard(): UseDashboardReturn {
             totalStaff = adminList.filter(a => a.role === 'staff').length;
 
             setAdmins(adminList);
+          } else {
+            console.warn('Failed to fetch admins:', adminsResponse.status);
           }
         } catch (err) {
           console.warn('Failed to fetch admin users:', err);
@@ -225,10 +266,13 @@ export function useDashboard(): UseDashboardReturn {
             }, 0) / productsList.length
           : 0;
 
-        const totalOrders = ordersList.length;
-        const pendingOrders = ordersList.filter(o =>
-          o.status === 'verifying_payment' || o.status === 'pending_payment'
-        ).length;
+        // คำนวณ total revenue จากออเดอร์ที่ชำระแล้ว
+        const totalOrderRevenue = ordersList
+          .filter(o => o.status === 'paid' || o.status === 'shipped' || o.status === 'delivered')
+          .reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+
+        const totalOrders = totalOrdersCount;
+        const pendingOrders = verifyingOrdersCount + pendingOrdersCount;
 
         setStats({
           admins: {
