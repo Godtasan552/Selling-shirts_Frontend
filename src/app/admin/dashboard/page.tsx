@@ -29,7 +29,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'NEXT_PUBLIC_API_URL';
         const token = localStorage.getItem('accessToken');
 
         // Fetch products
