@@ -1,11 +1,8 @@
-// ========================================
-// app/admin/layout.tsx
-// ========================================
 'use client';
 
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { Menu, X, LogOut } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { Menu, X, LogOut, Loader } from 'lucide-react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -13,20 +10,72 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const isLoginPage = pathname === '/admin/login';
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+
+  // Authentication checking
+  useEffect(() => {
+    const checkAuth = async () => {
+      // If it's login page and already has token → redirect to dashboard
+      if (isLoginPage) {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          router.push('/admin/dashboard');
+        }
+        setIsChecking(false);
+        return;
+      }
+
+      // If it's not login page → check token
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        router.push('/admin/login');
+        setIsChecking(false);
+        return;
+      }
+
+      setIsAuthenticated(true);
+      setIsChecking(false);
+    };
+
+    checkAuth();
+  }, [isLoginPage, router]);
 
   const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('admin');
     localStorage.removeItem('adminToken');
-    window.location.href = '/admin/login';
+
+    router.push('/admin/login');
   };
 
-  // ถ้าเป็นหน้า login ให้แสดง children เฉยๆ
+  // If login page → show children only
   if (isLoginPage) {
     return <>{children}</>;
   }
 
-  // ถ้าไม่ใช่หน้า login ให้แสดงพร้อม sidebar
+  // During authentication check
+  if (isChecking) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <Loader className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated → return nothing (redirect handled above)
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  // If authenticated (not login page) → show layout
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
@@ -48,11 +97,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
             >
-              {sidebarOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
+              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -100,7 +145,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="p-4 border-t border-slate-700">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors font-medium"
           >
             <LogOut className="w-5 h-5" />
             {sidebarOpen && <span>Logout</span>}
@@ -118,9 +163,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         {/* Content */}
-        <div className="p-6">
-          {children}
-        </div>
+        <div className="p-6">{children}</div>
       </main>
     </div>
   );

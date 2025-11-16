@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "animate.css"; // <-- import จาก node_modules
-import LoginPage from "./admin/login/page";
+
 
 
 export const metadata: Metadata = {
@@ -18,7 +18,6 @@ export default function RootLayout({
     <html lang="en">
       <body >
         {children}
-        <LoginPage />
       </body>
     </html>
   );
