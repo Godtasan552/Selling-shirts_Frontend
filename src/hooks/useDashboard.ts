@@ -59,7 +59,9 @@ export interface DashboardStats {
   };
   totalProducts: number;
   totalOrders: number;
+  completedOrders: number;
   totalRevenue: number;
+  orderRevenue: number;
   pendingOrders: number;
   totalInventory: number;
   averageProductPrice: number;
@@ -87,7 +89,7 @@ export interface Order {
   totalProductPrice: number;
   shippingCost: number;
   totalPrice: number;
-  status: "pending_payment" | "verifying_payment" | "paid" | "shipped" | "delivered" | "cancelled";
+  status: "pending_payment" | "verifying_payment" | "paid" | "shipping" | "completed" | "cancelled";
   paymentSlip?: string;
   approvedBy?: string;
   paidAt?: Date;
@@ -266,12 +268,13 @@ export function useDashboard(): UseDashboardReturn {
             }, 0) / productsList.length
           : 0;
 
-        // คำนวณ total revenue จากออเดอร์ที่ชำระแล้ว
+        // คำนวณ total revenue จากออเดอร์ที่ชำระแล้ว (paid, shipping, completed)
         const totalOrderRevenue = ordersList
-          .filter(o => o.status === 'paid' || o.status === 'shipped' || o.status === 'delivered')
+          .filter(o => o.status === 'paid' || o.status === 'shipping' || o.status === 'completed')
           .reduce((sum, o) => sum + (o.totalPrice || 0), 0);
 
         const totalOrders = totalOrdersCount;
+        const completedOrders = ordersList.filter(o => o.status === 'completed').length;
         const pendingOrders = verifyingOrdersCount + pendingOrdersCount;
 
         setStats({
@@ -291,7 +294,9 @@ export function useDashboard(): UseDashboardReturn {
           },
           totalProducts: productsList.length,
           totalOrders,
+          completedOrders: completedOrders || 0,
           totalRevenue: totalProductRevenue,
+          orderRevenue: totalOrderRevenue || 0,
           pendingOrders,
           totalInventory,
           averageProductPrice: averagePrice,

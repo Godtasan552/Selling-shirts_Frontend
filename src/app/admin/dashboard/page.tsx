@@ -6,7 +6,6 @@ import { ProductTable } from '@/components/dashboards/ProductTable';
 import { ProductSummary } from '@/components/dashboards/ProductSummary';
 import { OrderTable } from '@/components/dashboards/OrderTable';
 
-
 import { LoadingState } from '@/components/dashboards/LoadingState';
 import { ErrorState } from '@/components/dashboards/ErrorState';
 
@@ -63,8 +62,8 @@ export default function DashboardPage() {
           color="bg-purple-500" 
         />
         <StatCard 
-          title="มูลค่ารวมของสินค้า" 
-          value={`฿${(stats?.totalRevenue || 0).toLocaleString('th-TH', { maximumFractionDigits: 0 })}`} 
+          title="ยอดขายสินค้า" 
+          value={`฿${(stats?.orderRevenue || 0).toLocaleString('th-TH', { maximumFractionDigits: 0 })}`} 
           icon="💰" 
           color="bg-orange-500" 
         />
@@ -116,15 +115,30 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Product Summary */}
-        <ProductSummary stats={stats} />
+        {/* Sales Summary */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">📈 สรุปการขาย</h3>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center pb-3 border-b">
+              <span className="text-gray-600">ออเดอร์ที่ขายแล้ว</span>
+              <span className="text-2xl font-bold text-green-600">{stats?.completedOrders || 0}</span>
+            </div>
+            <div className="flex justify-between items-center pb-3 border-b">
+              <span className="text-gray-600">ยอดขาย</span>
+              <span className="text-xl font-bold text-blue-600">฿{(stats?.orderRevenue || 0).toLocaleString('th-TH', { maximumFractionDigits: 0 })}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">ออเดอร์รอตรวจสอบ</span>
+              <span className="text-xl font-bold text-orange-600">{stats?.pendingOrders || 0}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Product Section */}
       <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
         <ProductTable products={products} />
       </div>
-
 
       {/* Orders */}
       <div className="grid grid-cols-1 gap-6">

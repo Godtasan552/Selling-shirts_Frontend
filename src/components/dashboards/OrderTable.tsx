@@ -10,9 +10,9 @@ export function OrderTable({ orders }: { orders: Order[] }) {
         return 'bg-yellow-100 text-yellow-800';
       case 'paid':
         return 'bg-green-100 text-green-800';
-      case 'shipped':
+      case 'shipping':
         return 'bg-indigo-100 text-indigo-800';
-      case 'delivered':
+      case 'completed':
         return 'bg-emerald-100 text-emerald-800';
       case 'cancelled':
         return 'bg-red-100 text-red-800';
@@ -26,8 +26,8 @@ export function OrderTable({ orders }: { orders: Order[] }) {
       pending_payment: 'รอชำระเงิน',
       verifying_payment: 'รอตรวจสอบ',
       paid: 'ชำระแล้ว',
-      shipped: 'จัดส่งแล้ว',
-      delivered: 'ส่งมอบแล้ว',
+      shipping: 'จัดส่งแล้ว',
+      completed: 'สำเร็จ',
       cancelled: 'ยกเลิก',
     };
     return labels[status] || status;
@@ -104,7 +104,7 @@ export function OrderTable({ orders }: { orders: Order[] }) {
       </div>
 
       {/* Order Stats Summary */}
-      <div className="mt-6 pt-4 border-t grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="mt-6 pt-4 border-t grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="text-center">
           <p className="text-gray-600 text-sm">รวมออเดอร์</p>
           <p className="text-2xl font-bold text-blue-600">{orders.length}</p>
@@ -116,9 +116,15 @@ export function OrderTable({ orders }: { orders: Order[] }) {
           </p>
         </div>
         <div className="text-center">
-          <p className="text-gray-600 text-sm">ชำระแล้ว</p>
+          <p className="text-gray-600 text-sm">จัดส่งแล้ว</p>
+          <p className="text-2xl font-bold text-indigo-600">
+            {orders.filter(o => o.status === 'shipping').length}
+          </p>
+        </div>
+        <div className="text-center">
+          <p className="text-gray-600 text-sm">สำเร็จ</p>
           <p className="text-2xl font-bold text-green-600">
-            {orders.filter(o => o.status === 'paid' || o.status === 'shipped' || o.status === 'delivered').length}
+            {orders.filter(o => o.status === 'completed').length}
           </p>
         </div>
         <div className="text-center">
