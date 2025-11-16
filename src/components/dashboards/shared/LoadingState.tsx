@@ -1,4 +1,6 @@
-// components/dashboard/LoadingState.tsx
+// ============================================
+// 5. components/dashboard/shared/LoadingState.tsx
+// ============================================
 import { Loader } from 'lucide-react';
 
 export function LoadingState() {

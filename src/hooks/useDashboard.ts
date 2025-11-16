@@ -1,5 +1,7 @@
-// hooks/useDashboard.ts
-import { useState, useEffect } from 'react';
+// ============================================
+// 1. hooks/useDashboard.ts - REFACTORED
+// ============================================
+import { useState, useEffect, useCallback } from 'react';
 
 export interface IVariant {
   size: string;
@@ -30,7 +32,6 @@ export interface Package {
   variants?: IVariant[];
 }
 
-// Admin User
 export interface AdminUser {
   _id: string;
   username: string;
@@ -41,7 +42,6 @@ export interface AdminUser {
   createdAt: string;
 }
 
-// Dashboard Statistics
 export interface DashboardStats {
   admins: {
     total: number;
@@ -67,7 +67,6 @@ export interface DashboardStats {
   averageProductPrice: number;
 }
 
-// Orders
 export interface OrderItem {
   productId: string;
   name: string;
@@ -97,7 +96,6 @@ export interface Order {
   updatedAt?: string;
 }
 
-// Users
 export interface User {
   _id: string;
   phone?: string;
@@ -109,7 +107,6 @@ export interface User {
   createdAt: string;
 }
 
-// Hook Return Type
 interface UseDashboardReturn {
   stats: DashboardStats | null;
   products: IProduct[];
@@ -119,9 +116,78 @@ interface UseDashboardReturn {
   loading: boolean;
   error: string;
   packages: Package[];
+  refetch: () => void;
 }
 
-// Custom Hook
+// สำหรับการหา stats ตั้งแต่ raw data
+const calculateStats = (
+  products: IProduct[],
+  orders: Order[],
+  users: User[],
+  admins: AdminUser[]
+): DashboardStats => {
+  const totalInventory = products.reduce((sum, product) => {
+    return sum + product.variants.reduce((variantSum, variant) => 
+      variantSum + (variant.quantity || 0), 0);
+  }, 0);
+
+  const totalProductRevenue = products.reduce((sum, product) => {
+    return sum + product.variants.reduce((variantSum, variant) => {
+      return variantSum + (variant.price * (variant.quantity || 0));
+    }, 0);
+  }, 0);
+
+  const averagePrice = products.length > 0
+    ? products.reduce((sum, product) => {
+        const avgProductPrice = product.variants.length > 0
+          ? product.variants.reduce((sum, v) => sum + v.price, 0) / product.variants.length
+          : 0;
+        return sum + avgProductPrice;
+      }, 0) / products.length
+    : 0;
+
+  const totalOrderRevenue = orders
+    .filter(o => ['paid', 'shipping', 'completed'].includes(o.status))
+    .reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+
+  const verifiedUsers = users.filter(u => u.verified).length;
+  const phoneUsers = users.filter(u => u.phone && !u.googleId).length;
+  const googleUsers = users.filter(u => u.googleId).length;
+
+  const totalAdmins = admins.filter(a => a.role === 'admin').length;
+  const totalStaff = admins.filter(a => a.role === 'staff').length;
+
+  const completedOrders = orders.filter(o => o.status === 'completed').length;
+  const pendingOrders = orders.filter(o => 
+    ['pending_payment', 'verifying_payment'].includes(o.status)
+  ).length;
+
+  return {
+    admins: {
+      total: totalAdmins + totalStaff,
+      admin: totalAdmins,
+      staff: totalStaff,
+    },
+    users: {
+      total: users.length,
+      verified: verifiedUsers,
+      unverified: users.length - verifiedUsers,
+      byProvider: {
+        phone: phoneUsers,
+        google: googleUsers,
+      },
+    },
+    totalProducts: products.length,
+    totalOrders: orders.length,
+    completedOrders,
+    totalRevenue: totalProductRevenue,
+    orderRevenue: totalOrderRevenue,
+    pendingOrders,
+    totalInventory,
+    averageProductPrice: averagePrice,
+  };
+};
+
 export function useDashboard(): UseDashboardReturn {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -132,33 +198,41 @@ export function useDashboard(): UseDashboardReturn {
   const [error, setError] = useState('');
   const [packages, setPackages] = useState<Package[]>([]);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  const getToken = useCallback(() => {
+    return typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  }, []);
 
-        if (!token) throw new Error('No authentication token found');
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError('');
 
-        // Fetch products
-        const productsResponse = await fetch(`${apiUrl}/api/products`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const token = getToken();
 
-        const productsData = await productsResponse.json();
-        const productsList: IProduct[] = Array.isArray(productsData.data)
-          ? productsData.data
-          : Array.isArray(productsData)
-          ? productsData
-          : [];
+      if (!token) throw new Error('No authentication token found');
 
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+
+      // Fetch all data in parallel
+      const [productsRes, ordersRes, usersRes, adminsRes] = await Promise.allSettled([
+        fetch(`${apiUrl}/api/products`, { method: 'GET', headers }),
+        fetch(`${apiUrl}/api/admin/orders/all`, { headers }),
+        fetch(`${apiUrl}/api/admin/users?limit=100`, { headers }),
+        fetch(`${apiUrl}/api/admin/admin-users`, { headers }),
+      ]);
+
+      // Handle products
+      let productsList: IProduct[] = [];
+      if (productsRes.status === 'fulfilled' && productsRes.value.ok) {
+        const data = await productsRes.value.json();
+        productsList = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
         setProducts(productsList.slice(0, 10));
 
-        // สร้าง packages จาก products
+        // Create packages from products
         const packageList: Package[] = productsList.slice(0, 5).map(p => ({
           id: p._id,
           name: p.name,
@@ -167,152 +241,48 @@ export function useDashboard(): UseDashboardReturn {
           variants: p.variants,
         }));
         setPackages(packageList);
-
-        // Fetch orders - ดึงจาก admin endpoint
-        let ordersList: Order[] = [];
-        let totalOrdersCount = 0;
-        let pendingOrdersCount = 0;
-        let verifyingOrdersCount = 0;
-
-        try {
-          const ordersResponse = await fetch(`${apiUrl}/api/admin/orders/all`, {
-            headers: { 'Authorization': `Bearer ${token}` },
-          });
-
-          if (ordersResponse.ok) {
-            const ordersData = await ordersResponse.json();
-            ordersList = Array.isArray(ordersData.orders) ? ordersData.orders : [];
-            totalOrdersCount = ordersData.count || ordersList.length;
-
-            // นับจำนวนตามสถานะ
-            verifyingOrdersCount = ordersList.filter(o => o.status === 'verifying_payment').length;
-            pendingOrdersCount = ordersList.filter(o => o.status === 'pending_payment').length;
-
-            setOrders(ordersList.slice(0, 10));
-          } else {
-            console.warn('Failed to fetch orders:', ordersResponse.status);
-          }
-        } catch (err) {
-          console.warn('Error fetching orders:', err);
-        }
-
-        // Fetch normal users
-        const usersResponse = await fetch(`${apiUrl}/api/admin/users?limit=100`, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-
-        let usersList: User[] = [];
-        let totalUsers = 0;
-        let verifiedUsers = 0;
-        let unverifiedUsers = 0;
-        let phoneUsers = 0;
-        let googleUsers = 0;
-
-        if (usersResponse.ok) {
-          const usersData = await usersResponse.json();
-          usersList = Array.isArray(usersData.data) ? usersData.data : [];
-          
-          totalUsers = usersData.pagination?.total || usersList.length;
-          verifiedUsers = usersList.filter(u => u.verified).length;
-          unverifiedUsers = usersList.filter(u => !u.verified).length;
-          phoneUsers = usersList.filter(u => u.phone && !u.googleId).length;
-          googleUsers = usersList.filter(u => u.googleId).length;
-
-          setUsers(usersList.slice(0, 5));
-        } else {
-          console.warn('Failed to fetch users:', usersResponse.status);
-        }
-
-        // Fetch admin users
-        let adminList: AdminUser[] = [];
-        let totalAdmins = 0;
-        let totalStaff = 0;
-
-        try {
-          const adminsResponse = await fetch(`${apiUrl}/api/admin/admin-users`, {
-            headers: { 'Authorization': `Bearer ${token}` },
-          });
-
-          if (adminsResponse.ok) {
-            const adminsData = await adminsResponse.json();
-            adminList = Array.isArray(adminsData.data) ? adminsData.data : [];
-            
-            totalAdmins = adminList.filter(a => a.role === 'admin').length;
-            totalStaff = adminList.filter(a => a.role === 'staff').length;
-
-            setAdmins(adminList);
-          } else {
-            console.warn('Failed to fetch admins:', adminsResponse.status);
-          }
-        } catch (err) {
-          console.warn('Failed to fetch admin users:', err);
-        }
-
-        // คำนวณ stats
-        const totalInventory = productsList.reduce((sum, product) => {
-          return sum + product.variants.reduce((variantSum, variant) => variantSum + (variant.quantity || 0), 0);
-        }, 0);
-
-        const totalProductRevenue = productsList.reduce((sum, product) => {
-          return sum + product.variants.reduce((variantSum, variant) => {
-            return variantSum + (variant.price * (variant.quantity || 0));
-          }, 0);
-        }, 0);
-
-        const averagePrice = productsList.length > 0
-          ? productsList.reduce((sum, product) => {
-              const avgProductPrice = product.variants.length > 0
-                ? product.variants.reduce((sum, v) => sum + v.price, 0) / product.variants.length
-                : 0;
-              return sum + avgProductPrice;
-            }, 0) / productsList.length
-          : 0;
-
-        // คำนวณ total revenue จากออเดอร์ที่ชำระแล้ว (paid, shipping, completed)
-        const totalOrderRevenue = ordersList
-          .filter(o => o.status === 'paid' || o.status === 'shipping' || o.status === 'completed')
-          .reduce((sum, o) => sum + (o.totalPrice || 0), 0);
-
-        const totalOrders = totalOrdersCount;
-        const completedOrders = ordersList.filter(o => o.status === 'completed').length;
-        const pendingOrders = verifyingOrdersCount + pendingOrdersCount;
-
-        setStats({
-          admins: {
-            total: totalAdmins + totalStaff,
-            admin: totalAdmins,
-            staff: totalStaff,
-          },
-          users: {
-            total: totalUsers,
-            verified: verifiedUsers,
-            unverified: unverifiedUsers,
-            byProvider: {
-              phone: phoneUsers,
-              google: googleUsers,
-            },
-          },
-          totalProducts: productsList.length,
-          totalOrders,
-          completedOrders: completedOrders || 0,
-          totalRevenue: totalProductRevenue,
-          orderRevenue: totalOrderRevenue || 0,
-          pendingOrders,
-          totalInventory,
-          averageProductPrice: averagePrice,
-        });
-
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard';
-        setError(errorMessage);
-        console.error(err);
-      } finally {
-        setLoading(false);
       }
-    };
 
+      // Handle orders
+      let ordersList: Order[] = [];
+      if (ordersRes.status === 'fulfilled' && ordersRes.value.ok) {
+        const data = await ordersRes.value.json();
+        ordersList = Array.isArray(data.orders) ? data.orders : [];
+        setOrders(ordersList.slice(0, 10));
+      }
+
+      // Handle users
+      let usersList: User[] = [];
+      if (usersRes.status === 'fulfilled' && usersRes.value.ok) {
+        const data = await usersRes.value.json();
+        usersList = Array.isArray(data.data) ? data.data : [];
+        setUsers(usersList.slice(0, 5));
+      }
+
+      // Handle admins
+      let adminList: AdminUser[] = [];
+      if (adminsRes.status === 'fulfilled' && adminsRes.value.ok) {
+        const data = await adminsRes.value.json();
+        adminList = Array.isArray(data.data) ? data.data : [];
+        setAdmins(adminList);
+      }
+
+      // Calculate and set stats
+      const calculatedStats = calculateStats(productsList, ordersList, usersList, adminList);
+      setStats(calculatedStats);
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard';
+      setError(errorMessage);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [getToken]);
+
+  useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [fetchDashboardData]);
 
   return {
     stats,
@@ -323,5 +293,6 @@ export function useDashboard(): UseDashboardReturn {
     loading,
     error,
     packages,
+    refetch: fetchDashboardData,
   };
 }
