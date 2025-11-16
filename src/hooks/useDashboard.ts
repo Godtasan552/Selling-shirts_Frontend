@@ -30,9 +30,22 @@ export interface Package {
   variants?: IVariant[];
 }
 
-// Dashboard Statistics
+// Dashboard Statistics (อัปเดตให้ตรงกับ backend)
 export interface DashboardStats {
-  totalUsers: number;
+  admins: {
+    total: number;
+    admin: number;
+    staff: number;
+  };
+  users: {
+    total: number;
+    verified: number;
+    unverified: number;
+    byProvider: {
+      phone: number;
+      google: number;
+    };
+  };
   totalProducts: number;
   totalOrders: number;
   totalRevenue: number;
@@ -50,14 +63,15 @@ export interface Order {
   createdAt: string;
 }
 
-// Users
+// Users (อัปเดตให้ตรงกับ User model จาก backend)
 export interface User {
   _id: string;
-  email: string;
   phone?: string;
-  firstName?: string;
-  lastName?: string;
-  role?: string;
+  email?: string;
+  name?: string;
+  picture?: string;
+  verified: boolean;
+  googleId?: string;
   createdAt: string;
 }
 
@@ -69,7 +83,7 @@ interface UseDashboardReturn {
   users: User[];
   loading: boolean;
   error: string;
-  packages: Package[]; // เพิ่ม packages
+  packages: Package[];
 }
 
 // Custom Hook
@@ -80,12 +94,12 @@ export function useDashboard(): UseDashboardReturn {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [packages, setPackages] = useState<Package[]>([]); // state สำหรับ packages
+  const [packages, setPackages] = useState<Package[]>([]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'NEXT_PUBLIC_API_URL';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
         const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
         if (!token) throw new Error('No authentication token found');
@@ -108,7 +122,7 @@ export function useDashboard(): UseDashboardReturn {
 
         setProducts(productsList.slice(0, 10));
 
-        // ตัวอย่างสร้าง packages จาก products (สมมติเลือก 5 ตัวแรก)
+        // สร้าง packages จาก products
         const packageList: Package[] = productsList.slice(0, 5).map(p => ({
           id: p._id,
           name: p.name,
@@ -130,19 +144,35 @@ export function useDashboard(): UseDashboardReturn {
           setOrders(ordersList.slice(0, 5));
         }
 
-        // Fetch users
-        const usersResponse = await fetch(`${apiUrl}/api/users`, {
+        // Fetch users (อัปเดต endpoint ให้ตรงกับ backend)
+        const usersResponse = await fetch(`${apiUrl}/api/admin/users?limit=100`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
 
         let usersList: User[] = [];
         let totalUsers = 0;
+        let verifiedUsers = 0;
+        let unverifiedUsers = 0;
+        let phoneUsers = 0;
+        let googleUsers = 0;
+        const totalAdmins = 0;
+        const totalStaff = 0;
+
         if (usersResponse.ok) {
           const usersData = await usersResponse.json();
           usersList = Array.isArray(usersData.data) ? usersData.data : [];
-          totalUsers = usersList.length;
+          
+          totalUsers = usersData.pagination?.total || usersList.length;
+          verifiedUsers = usersList.filter(u => u.verified).length;
+          unverifiedUsers = usersList.filter(u => !u.verified).length;
+          phoneUsers = usersList.filter(u => u.phone && !u.googleId).length;
+          googleUsers = usersList.filter(u => u.googleId).length;
+
           setUsers(usersList.slice(0, 5));
         }
+
+        // Fetch admin stats (ตัวเลือก: สามารถเพิ่ม endpoint นี้ในระบบ admin ได้)
+        // const adminResponse = await fetch(`${apiUrl}/api/admin/stats`, { ... });
 
         // คำนวณ stats
         const totalInventory = productsList.reduce((sum, product) => {
@@ -170,7 +200,20 @@ export function useDashboard(): UseDashboardReturn {
         ).length;
 
         setStats({
-          totalUsers,
+          admins: {
+            total: totalAdmins + totalStaff,
+            admin: totalAdmins,
+            staff: totalStaff,
+          },
+          users: {
+            total: totalUsers,
+            verified: verifiedUsers,
+            unverified: unverifiedUsers,
+            byProvider: {
+              phone: phoneUsers,
+              google: googleUsers,
+            },
+          },
           totalProducts: productsList.length,
           totalOrders,
           totalRevenue: totalProductRevenue,
@@ -198,6 +241,6 @@ export function useDashboard(): UseDashboardReturn {
     users,
     loading,
     error,
-    packages, // คืนค่า packages
+    packages,
   };
 }
