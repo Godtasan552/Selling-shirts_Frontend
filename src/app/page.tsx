@@ -1,6 +1,10 @@
+import Link from 'next/link';
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex flex-col items-center justify-center p-8 space-y-8">
+      
+      
 
       {/* Main Card */}
       <div className="card w-full max-w-md bg-gradient-to-br from-purple-500 to-indigo-600 shadow-2xl rounded-xl animate__animated animate__fadeInUp">
@@ -38,6 +42,8 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      
 
     </div>
   );
