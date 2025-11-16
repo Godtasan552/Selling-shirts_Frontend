@@ -5,12 +5,13 @@ import { StatCard } from '@/components/dashboards/StatCard';
 import { ProductTable } from '@/components/dashboards/ProductTable';
 import { ProductSummary } from '@/components/dashboards/ProductSummary';
 import { OrderTable } from '@/components/dashboards/OrderTable';
-import { UserTable } from '@/components/dashboards/UserTable';
+
+
 import { LoadingState } from '@/components/dashboards/LoadingState';
 import { ErrorState } from '@/components/dashboards/ErrorState';
 
 export default function DashboardPage() {
-  const { stats, products, orders, users, loading, error } = useDashboard();
+  const { stats, products, orders, loading, error } = useDashboard();
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState error={error} />;
@@ -23,70 +24,20 @@ export default function DashboardPage() {
         <p className="text-gray-600 mt-2">สรุปข้อมูลระบบและรายงาน</p>
       </div>
 
-      {/* User Stats Section */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">📊 สถิติผู้ใช้</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          <StatCard 
-            title="ผู้ใช้ทั้งหมด" 
-            value={stats?.users?.total?.toLocaleString() || '0'} 
-            icon="👥" 
-            color="bg-blue-500" 
-          />
-          <StatCard 
-            title="ยืนยันแล้ว" 
-            value={stats?.users?.verified?.toLocaleString() || '0'} 
-            icon="✓" 
-            color="bg-green-500" 
-          />
-          <StatCard 
-            title="รอยืนยัน" 
-            value={stats?.users?.unverified?.toLocaleString() || '0'} 
-            icon="⏳" 
-            color="bg-yellow-500" 
-          />
-          <StatCard 
-            title="Phone Login" 
-            value={stats?.users?.byProvider?.phone?.toLocaleString() || '0'} 
-            icon="📱" 
-            color="bg-purple-500" 
-          />
-          <StatCard 
-            title="Google Login" 
-            value={stats?.users?.byProvider?.google?.toLocaleString() || '0'} 
-            icon="🔍" 
-            color="bg-red-500" 
-          />
-        </div>
-      </div>
-
-      {/* Admin/Staff Stats Section */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">👨‍💼 สถิติแอดมิน/พนักงาน</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCard 
-            title="แอดมินทั้งหมด" 
-            value={stats?.admins?.admin?.toLocaleString() || '0'} 
-            icon="🔐" 
-            color="bg-red-500" 
-          />
-          <StatCard 
-            title="พนักงาน" 
-            value={stats?.admins?.staff?.toLocaleString() || '0'} 
-            icon="👔" 
-            color="bg-indigo-500" 
-          />
-          <StatCard 
-            title="รวมทั้งหมด" 
-            value={stats?.admins?.total?.toLocaleString() || '0'} 
-            icon="👨‍💼" 
-            color="bg-slate-500" 
-          />
-        </div>
-      </div>
-
-      {/* Product & Order Stats Grid */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard 
+          title="ผู้ดูแลทั้งหมด" 
+          value={stats?.admins.total?.toLocaleString() || '0'} 
+          icon="👨‍💼" 
+          color="bg-indigo-500" 
+        />
+        <StatCard 
+          title="จำนวนผู้ใช้ทั้งหมด" 
+          value={stats?.users.total?.toLocaleString() || '0'} 
+          icon="👥" 
+          color="bg-blue-500" 
+        />
         <StatCard 
           title="จำนวนสินค้าทั้งหมด" 
           value={stats?.totalProducts?.toLocaleString() || '0'} 
@@ -103,19 +54,19 @@ export default function DashboardPage() {
           title="ราคาเฉลี่ยต่อสินค้า" 
           value={`฿${(stats?.averageProductPrice || 0).toLocaleString('th-TH', { maximumFractionDigits: 0 })}`} 
           icon="💵" 
-          color="bg-orange-500" 
-        />
-        <StatCard 
-          title="มูลค่ารวมของสินค้า" 
-          value={`฿${(stats?.totalRevenue || 0).toLocaleString('th-TH', { maximumFractionDigits: 0 })}`} 
-          icon="💰" 
-          color="bg-amber-500" 
+          color="bg-yellow-500" 
         />
         <StatCard 
           title="จำนวนออเดอร์ทั้งหมด" 
           value={stats?.totalOrders?.toLocaleString() || '0'} 
           icon="🛒" 
           color="bg-purple-500" 
+        />
+        <StatCard 
+          title="มูลค่ารวมของสินค้า" 
+          value={`฿${(stats?.totalRevenue || 0).toLocaleString('th-TH', { maximumFractionDigits: 0 })}`} 
+          icon="💰" 
+          color="bg-orange-500" 
         />
         <StatCard 
           title="รอการตรวจสอบ" 
@@ -125,16 +76,59 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Product Section */}
+      {/* Admin and User Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <ProductTable products={products} />
+        {/* Admin Summary */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">📊 สรุปผู้ดูแล</h3>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center pb-3 border-b">
+              <span className="text-gray-600">รวมทั้งหมด</span>
+              <span className="text-2xl font-bold text-indigo-600">{stats?.admins.total || 0}</span>
+            </div>
+            <div className="flex justify-between items-center pb-3 border-b">
+              <span className="text-gray-600">แอดมิน</span>
+              <span className="text-xl font-bold text-red-600">{stats?.admins.admin || 0}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">พนักงาน</span>
+              <span className="text-xl font-bold text-purple-600">{stats?.admins.staff || 0}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* User Summary */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">👥 สรุปผู้ใช้</h3>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center pb-3 border-b">
+              <span className="text-gray-600">รวมทั้งหมด</span>
+              <span className="text-2xl font-bold text-blue-600">{stats?.users.total || 0}</span>
+            </div>
+            <div className="flex justify-between items-center pb-3 border-b">
+              <span className="text-gray-600">ยืนยันแล้ว</span>
+              <span className="text-xl font-bold text-green-600">{stats?.users.verified || 0}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">รอยืนยัน</span>
+              <span className="text-xl font-bold text-yellow-600">{stats?.users.unverified || 0}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Product Summary */}
         <ProductSummary stats={stats} />
       </div>
 
-      {/* Orders and Users */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Product Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+        <ProductTable products={products} />
+      </div>
+
+
+      {/* Orders */}
+      <div className="grid grid-cols-1 gap-6">
         <OrderTable orders={orders} />
-        <UserTable users={users} />
       </div>
 
       {/* Info Banner */}

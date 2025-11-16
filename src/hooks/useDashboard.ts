@@ -30,7 +30,18 @@ export interface Package {
   variants?: IVariant[];
 }
 
-// Dashboard Statistics (อัปเดตให้ตรงกับ backend)
+// Admin User
+export interface AdminUser {
+  _id: string;
+  username: string;
+  email: string;
+  role: "admin" | "staff";
+  permissions?: string[];
+  isActive: boolean;
+  createdAt: string;
+}
+
+// Dashboard Statistics
 export interface DashboardStats {
   admins: {
     total: number;
@@ -63,7 +74,7 @@ export interface Order {
   createdAt: string;
 }
 
-// Users (อัปเดตให้ตรงกับ User model จาก backend)
+// Users
 export interface User {
   _id: string;
   phone?: string;
@@ -81,6 +92,7 @@ interface UseDashboardReturn {
   products: IProduct[];
   orders: Order[];
   users: User[];
+  admins: AdminUser[];
   loading: boolean;
   error: string;
   packages: Package[];
@@ -92,6 +104,7 @@ export function useDashboard(): UseDashboardReturn {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [packages, setPackages] = useState<Package[]>([]);
@@ -144,7 +157,7 @@ export function useDashboard(): UseDashboardReturn {
           setOrders(ordersList.slice(0, 5));
         }
 
-        // Fetch users (อัปเดต endpoint ให้ตรงกับ backend)
+        // Fetch normal users
         const usersResponse = await fetch(`${apiUrl}/api/admin/users?limit=100`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
@@ -155,8 +168,6 @@ export function useDashboard(): UseDashboardReturn {
         let unverifiedUsers = 0;
         let phoneUsers = 0;
         let googleUsers = 0;
-        const totalAdmins = 0;
-        const totalStaff = 0;
 
         if (usersResponse.ok) {
           const usersData = await usersResponse.json();
@@ -171,8 +182,28 @@ export function useDashboard(): UseDashboardReturn {
           setUsers(usersList.slice(0, 5));
         }
 
-        // Fetch admin stats (ตัวเลือก: สามารถเพิ่ม endpoint นี้ในระบบ admin ได้)
-        // const adminResponse = await fetch(`${apiUrl}/api/admin/stats`, { ... });
+        // Fetch admin users
+        let adminList: AdminUser[] = [];
+        let totalAdmins = 0;
+        let totalStaff = 0;
+
+        try {
+          const adminsResponse = await fetch(`${apiUrl}/api/admin/admin-users`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+
+          if (adminsResponse.ok) {
+            const adminsData = await adminsResponse.json();
+            adminList = Array.isArray(adminsData.data) ? adminsData.data : [];
+            
+            totalAdmins = adminList.filter(a => a.role === 'admin').length;
+            totalStaff = adminList.filter(a => a.role === 'staff').length;
+
+            setAdmins(adminList);
+          }
+        } catch (err) {
+          console.warn('Failed to fetch admin users:', err);
+        }
 
         // คำนวณ stats
         const totalInventory = productsList.reduce((sum, product) => {
@@ -239,6 +270,7 @@ export function useDashboard(): UseDashboardReturn {
     products,
     orders,
     users,
+    admins,
     loading,
     error,
     packages,
