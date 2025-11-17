@@ -1,0 +1,230 @@
+// ============================================
+// components/admin/OrdersTab.tsx - FIXED
+// ============================================
+import { ChevronDown, Check, X } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
+import type { Order } from '@/types/product_admin';
+import { ORDER_STATUS } from '@/types/product_admin';
+
+interface OrdersTabProps {
+  orders: Order[];
+  loading: boolean;
+  error: string;
+  onConfirmOrder: (orderId: string) => Promise<boolean>;
+  onRejectOrder: (orderId: string) => Promise<boolean>;
+  onUpdateOrderStatus: (orderId: string, status: string) => Promise<boolean>;
+}
+
+export function OrdersTab({
+  orders,
+  loading,
+  error,
+  onConfirmOrder,
+  onRejectOrder,
+  onUpdateOrderStatus,
+}: OrdersTabProps) {
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState('all');
+
+  const filteredOrders =
+    filterStatus === 'all'
+      ? orders
+      : orders.filter((o) => o.status === filterStatus);
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Orders</h2>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="all">All Status</option>
+          {Object.entries(ORDER_STATUS).map(([key, val]) => (
+            <option key={key} value={key}>
+              {val.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 p-4 rounded-lg mb-4">
+          <p className="text-red-800">{error}</p>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading ? (
+        <div className="text-center py-12">
+          <p className="text-gray-600">Loading orders...</p>
+        </div>
+      ) : filteredOrders.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No orders found</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filteredOrders.map((order) => (
+            <OrderCard
+              key={order._id}
+              order={order}
+              isExpanded={expandedOrder === order._id}
+              onToggle={() =>
+                setExpandedOrder(expandedOrder === order._id ? null : order._id)
+              }
+              onConfirm={() => onConfirmOrder(order._id)}
+              onReject={() => onRejectOrder(order._id)}
+              onUpdateStatus={(status) => onUpdateOrderStatus(order._id, status)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================
+// OrderCard Component
+// ============================================
+interface OrderCardProps {
+  order: Order;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onConfirm: () => void;
+  onReject: () => void;
+  onUpdateStatus: (status: string) => void;
+}
+
+function OrderCard({
+  order,
+  isExpanded,
+  onToggle,
+  onConfirm,
+  onReject,
+  onUpdateStatus,
+}: OrderCardProps) {
+  const statusConfig =
+    ORDER_STATUS[order.status as keyof typeof ORDER_STATUS];
+
+  return (
+    <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+      {/* Header - Collapsible */}
+      <div
+        onClick={onToggle}
+        className="p-4 cursor-pointer hover:bg-gray-50 flex justify-between items-center"
+      >
+        <div className="flex-1">
+          <h3 className="font-semibold text-gray-900">{order.customerName}</h3>
+          <p className="text-sm text-gray-600">Order ID: {order._id.slice(-8)}</p>
+          <p className="text-sm text-gray-600">{order.customerPhone}</p>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <p className="font-semibold text-gray-900">
+              ฿{order.totalPrice?.toFixed(2) || '0.00'}
+            </p>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium inline-block ${
+                statusConfig?.color || 'bg-gray-100 text-gray-800'
+              }`}
+            >
+              {statusConfig?.label || order.status}
+            </span>
+          </div>
+
+          <ChevronDown
+            size={20}
+            className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          />
+        </div>
+      </div>
+
+      {/* Expanded Content */}
+      {isExpanded && (
+        <div className="border-t p-4 bg-gray-50 space-y-4">
+          {/* Order Items */}
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Items</h4>
+            <div className="space-y-2">
+              {order.items?.map((item, idx) => (
+                <div key={idx} className="text-sm text-gray-600">
+                  {item.name} - Size: {item.size} (x{item.quantity}) - ฿
+                  {(item.price * item.quantity).toFixed(2)}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Order Details */}
+          <div className="border-t pt-4">
+            <div className="space-y-2">
+              <p className="text-sm">
+                <strong>Address:</strong> {order.customerAddress}
+              </p>
+              <p className="text-sm">
+                <strong>Email:</strong> {order.customerEmail}
+              </p>
+              <p className="text-sm">
+                <strong>Shipping:</strong> ฿{order.shippingCost?.toFixed(2) || '0.00'}
+              </p>
+            </div>
+          </div>
+
+          {/* Payment Slip Section - For verifying_payment */}
+          {order.status === 'verifying_payment' && order.paymentSlip && (
+            <div className="border-t pt-4">
+              <p className="font-semibold text-gray-900 mb-3">Payment Slip</p>
+              <div className="relative w-32 h-32 mb-3">
+                <Image
+                  src={order.paymentSlip}
+                  alt="Payment slip"
+                  fill
+                  className="object-cover rounded border border-gray-300"
+                  priority={false}
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={onConfirm}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center justify-center gap-2 text-sm font-medium transition-colors"
+                >
+                  <Check size={18} /> Confirm
+                </button>
+                <button
+                  onClick={onReject}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded flex items-center justify-center gap-2 text-sm font-medium transition-colors"
+                >
+                  <X size={18} /> Reject
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Status Update Dropdown - For paid/shipping/completed */}
+          {['paid', 'shipping', 'completed'].includes(order.status) && (
+            <div className="border-t pt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Update Status
+              </label>
+              <select
+                value={order.status}
+                onChange={(e) => onUpdateStatus(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="paid">Paid</option>
+                <option value="shipping">Shipping</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
