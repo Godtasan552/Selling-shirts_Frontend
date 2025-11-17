@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { phoneRegex } from "@/utils/phoneregex";
+import { phoneRegex, passwordRegex } from "@/utils/phoneregex";
 import Input from "@/components/auth_user/Input";
 import Button from "@/components/auth_user/Button";
 import ErrorText from "@/components/auth_user/ErrorText";
@@ -10,6 +10,7 @@ import { Phone } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+
   const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -23,7 +24,10 @@ export default function RegisterPage() {
       setError("เบอร์โทรไม่ถูกต้อง (ต้องมี 10 หลัก และขึ้นต้นด้วย 0)");
       return;
     }
-
+    if (!passwordRegex.test(password)){
+        setError("รหัสผ่านต้องมีอย่างน้อย 7 ตัว และมีตัวใหญ่ ตัวเล็ก และอักขระพิเศษ")
+        return;
+    }
     const res = await post(`${API_URL}/auth/register`, {
       phone,
       password,

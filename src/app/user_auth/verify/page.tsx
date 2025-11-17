@@ -6,7 +6,6 @@ import Input from "@/components/auth_user/Input";
 import Button from "@/components/auth_user/Button";
 import ErrorText from "@/components/auth_user/ErrorText";
 import { post } from "@/lib/authApi";
-import { clearInterval } from "timers";
 
 export default function VerifyOTPPage() {
     const params = useSearchParams();
@@ -18,7 +17,7 @@ export default function VerifyOTPPage() {
     const [otp, setOtp] = useState(otpFromRegister);
     const [error, setError] = useState("");
     const [resendMsg, setResendMsg] = useState("");
-    const [timer, setTimer] = useState(0);
+    const [timer, setTimer] = useState(60);
     useEffect(() => {
         if (timer <= 0) return;
         const timeout = setTimeout(() => {
