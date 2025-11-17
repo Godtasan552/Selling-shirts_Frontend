@@ -37,6 +37,14 @@ export default function HomePage() {
 
         </Link>
       </div>
+   <div className="card-actions justify-end">
+        <Link href="/history">
+            <button className="btn btn-outline btn-black text-black hover:scale-105 transition-transform duration-300">
+            history
+            </button>
+
+        </Link>
+      </div>
       {/* Alert */}
       <div className="alert alert-success shadow-lg rounded-lg animate__animated animate__fadeInDown w-full max-w-md">
         <div>
