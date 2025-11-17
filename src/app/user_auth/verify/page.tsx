@@ -8,10 +8,11 @@ import ErrorText from "@/components/auth_user/ErrorText";
 import { post } from "@/lib/authApi";
 
 export default function VerifyOTPPage() {
-
+  const params = useSearchParams();
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const searchParams = useSearchParams();
   const phone = searchParams.get("phone") || "";
+  const otpFromRegister = params.get("otp") || "";
 
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
@@ -22,9 +23,8 @@ export default function VerifyOTPPage() {
       phone,
       otp,
     });
-
-    if (res.success) {
-      window.location.href = "/auth/login";
+    if (res.status == 200) {
+      window.location.href = "/user_auth/login";
     } else {
       setError(res.message || "OTP ไม่ถูกต้อง");
     }
@@ -33,7 +33,7 @@ export default function VerifyOTPPage() {
   const handleResend = async () => {
     const res = await post(`${API_URL}/auth/resend-otp`, { phone });
 
-    if (res.success) {
+    if (res.status === 200) {
       setResendMsg("ส่ง OTP ใหม่แล้ว");
     } else {
       setError("ส่ง OTP ไม่สำเร็จ");
@@ -44,6 +44,7 @@ export default function VerifyOTPPage() {
     <div className="max-w-md mx-auto mt-10 p-5 border rounded-lg shadow">
       <h1 className="text-xl font-bold mb-3">Verify OTP</h1>
       <p className="text-gray-500 mb-3">OTP sent to: {phone}</p>
+      <p className="text-gray-500 mb-3">OTP: {otpFromRegister}</p>
 
       <Input
         label="OTP"

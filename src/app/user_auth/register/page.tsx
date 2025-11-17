@@ -29,8 +29,8 @@ export default function RegisterPage() {
       password,
     });
 
-    if (res.success) {
-      router.push(`/auth/verify?phone=${phone}`);
+    if (res.status === 200 || res.status === 201) {
+          router.push(`/user_auth/verify?phone=${res.phone}&otp=${res.otp}`);
     } else {
       setError(res.message || "เกิดข้อผิดพลาด");
     }

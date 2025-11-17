@@ -1,9 +1,13 @@
 export async function post(url: string, body: any) {
-  const res = await fetch(url, {
+  const respoens = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
 
-  return res.json();
+  const data = await respoens.json();
+  return {
+    status: respoens.status,
+    ...data
+  };
 }
