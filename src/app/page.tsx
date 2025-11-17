@@ -1,50 +1,24 @@
 import Link from 'next/link';
+import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex flex-col items-center justify-center p-8 space-y-8">
-      
-      
-
-      {/* Main Card */}
-      <div className="card w-full max-w-md bg-gradient-to-br from-purple-500 to-indigo-600 shadow-2xl rounded-xl animate__animated animate__fadeInUp">
-        <div className="card-body">
-          <h2 className="card-title text-2xl font-bold text-white">Welcome to DaisyUI!</h2>
-          <p className="text-white/90">
-            This card demonstrates daisyUI + Tailwind + Animate.css with beautiful colors.
-          </p>
-          <div className="card-actions justify-end">
-            <button className="btn btn-outline btn-white animate__animated animate__headShake hover:scale-105 transition-transform duration-300">
-              Click Me
-            </button>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow container mx-auto p-4">
+        <div className="flex justify-center items-center h-full">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4 text-gray-800">ร้านขายเสื้อ</h1>
+            <p className="text-lg mb-8 text-gray-600">ยินดีต้อนรับสู่ร้านขายเสื้อออนไลน์ของเรา</p>
+            {/* เชื่อม หน้าสั่งซื้อสินค้า ตรงนี้ */}
+            <Link href="/order" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                ไปหน้าสั่งซื้อสินค้า
+              </Link>
           </div>
         </div>
-      </div>
-
-      {/* Alert */}
-      <div className="alert alert-success shadow-lg rounded-lg animate__animated animate__fadeInDown w-full max-w-md">
-        <div>
-          <span className="font-medium text-green-800">Success!</span> Your animation works perfectly.
-        </div>
-      </div>
-
-      {/* Additional Card */}
-      <div className="card w-full max-w-md bg-gradient-to-br from-green-400 to-teal-500 shadow-xl rounded-lg animate__animated animate__fadeInUp animate__delay-1s">
-        <div className="card-body">
-          <h2 className="card-title text-lg font-semibold text-white">Another Card</h2>
-          <p className="text-white/90">
-            You can stack multiple cards with spacing and smooth animations for better UI.
-          </p>
-          <div className="card-actions justify-start">
-            <button className="btn btn-outline btn-white animate__animated animate__headShake hover:scale-105 transition-transform duration-300">
-              Explore
-            </button>
-          </div>
-        </div>
-      </div>
-
-      
-
+      </main>
+      <Footer />
     </div>
   );
 }
