@@ -23,9 +23,18 @@ export default function HomePage() {
       {/* Button go to register page */}
       <div className="card-actions justify-end">
         <Link href="/user_auth/register">
-          <button className="btn btn-outline btn-white hover:scale-105 transition-transform duration-300">
-            Register
-          </button>
+            <button className="btn btn-outline btn-black text-black hover:scale-105 transition-transform duration-300">
+          Register
+            </button>
+
+        </Link>
+      </div>
+      <div className="card-actions justify-end">
+        <Link href="/user_auth/login">
+            <button className="btn btn-outline btn-black text-black hover:scale-105 transition-transform duration-300">
+          Login
+            </button>
+
         </Link>
       </div>
       {/* Alert */}
