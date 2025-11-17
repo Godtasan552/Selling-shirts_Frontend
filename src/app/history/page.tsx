@@ -14,32 +14,32 @@ export default function UserOrdersPage() {
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
 
-const fetchOrders = async (s?: string) => {
-  setLoading(true);
+  const fetchOrders = async (s?: string) => {
+    setLoading(true);
 
-  const url = s
-    ? `${API_URL}/orders/user?status=${s}`
-    : `${API_URL}/orders/user`;
+    const url = s
+      ? `${API_URL}/orders/user?status=${s}`
+      : `${API_URL}/orders/user`;
 
-  const localToken = localStorage.getItem("auth_token");
+    const localToken = localStorage.getItem("auth_token");
 
-  // มี token = login ด้วยเบอร์มือถือ
-  let res;
-  if (localToken) {
-    res = await authGet(url);
-  } else {
-    // ไม่มี token = อาจเป็น Google Login → ใช้ cookie แทน
-    res = await authGetCookie(url);
-  }
+    // มี token = login ด้วยเบอร์มือถือ
+    let res;
+    if (localToken) {
+      res = await authGet(url);
+    } else {
+      // ไม่มี token = อาจเป็น Google Login → ใช้ cookie แทน
+      res = await authGetCookie(url);
+    }
 
-  setLoading(false);
+    setLoading(false);
 
-  if (res.status === 200) {
-    setOrders(res.orders);
-  } else if (res.status === 401) {
-    router.push("/user_auth/login");
-  }
-};
+    if (res.status === 200) {
+      setOrders(res.orders);
+    } else if (res.status === 401) {
+      router.push("/user_auth/login");
+    }
+  };
 
 
   useEffect(() => {
@@ -47,7 +47,8 @@ const fetchOrders = async (s?: string) => {
   }, []);
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6">
+    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white text-black dark:bg-gray-900 dark:text-white">
+
       <h1 className="text-2xl font-bold mb-4 flex items-center gap-2">
         <Filter /> ประวัติการสั่งซื้อ
       </h1>
@@ -68,10 +69,12 @@ const fetchOrders = async (s?: string) => {
               setStatus(item.key);
               fetchOrders(item.key);
             }}
-            className={`px-3 py-1 rounded-full border text-sm ${
-              status === item.key ? "bg-black text-white" : "bg-white"
-            }`}
-          >
+            className={`px-3 py-1 rounded-full border text-sm transition
+                        ${status === item.key
+                ? "bg-black text-white dark:bg-white dark:text-black"
+                : "bg-white text-black dark:bg-gray-700 dark:text-white"
+              }
+              `} >
             {item.label}
           </button>
         ))}
