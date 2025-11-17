@@ -14,42 +14,47 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Authentication checking
+  // ✅ useEffect เฉพาะ client-side เท่านั้น
   useEffect(() => {
-    const checkAuth = async () => {
-      // Check token
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        router.push('/admin_login');
-        setIsChecking(false);
-        return;
-      }
+    setIsMounted(true);
 
-      setIsAuthenticated(true);
-      setIsChecking(false);
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        
+        if (!token) {
+          router.push('/admin_login');
+          setIsChecking(false);
+          return;
+        }
+
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        router.push('/admin_login');
+      } finally {
+        setIsChecking(false);
+      }
     };
 
     checkAuth();
-  }, [router, pathname]);
+  }, [router]);
 
   const handleLogout = () => {
-    // ลบข้อมูลทั้งหมด
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('admin');
     localStorage.removeItem('adminToken');
 
-    // Reset state
     setIsAuthenticated(false);
     setIsChecking(false);
-
-    // Redirect ไปหน้า login
     router.push('/admin_login');
   };
 
-  // During authentication check
-  if (isChecking) {
+  // ✅ ไม่ render อะไรจนกว่า client-side จะทำงาน
+  if (!isMounted || isChecking) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="text-center">
@@ -60,12 +65,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // If not authenticated → return nothing (redirect handled above)
   if (!isAuthenticated) {
     return null;
   }
 
-  // If authenticated → show layout
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
@@ -159,9 +162,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   );
 }
 
-// ========================================
-// Nav Item Component
-// ========================================
 interface NavItemProps {
   href: string;
   label: string;
@@ -186,9 +186,6 @@ function NavItem({ href, label, icon, sidebarOpen, isActive }: NavItemProps) {
   );
 }
 
-// ========================================
-// Helper Function
-// ========================================
 function getPageTitle(pathname: string): string {
   const titles: Record<string, string> = {
     '/admin/dashboard': 'Dashboard',

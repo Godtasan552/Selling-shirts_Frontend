@@ -80,7 +80,10 @@ export default function AdminLogin() {
       {/* Background Animation */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div 
+          className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"
+          style={{ animationDelay: '2s' }}
+        ></div>
       </div>
 
       <div className="w-full max-w-md relative z-10">
@@ -111,7 +114,12 @@ export default function AdminLogin() {
           {/* Form */}
           <div className="px-8 py-8">
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3 animate-shake">
+              <div 
+                className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3"
+                style={{
+                  animation: 'shake 0.5s ease-in-out'
+                }}
+              >
                 <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-red-700">{error}</p>
               </div>
@@ -202,14 +210,11 @@ export default function AdminLogin() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
           25% { transform: translateX(-10px); }
           75% { transform: translateX(10px); }
-        }
-        .animate-shake {
-          animation: shake 0.5s ease-in-out;
         }
       `}</style>
     </div>
