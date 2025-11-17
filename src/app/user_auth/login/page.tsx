@@ -26,7 +26,10 @@ export default function LoginPage() {
       password,
     });
 
-    if (res.success) {
+    if (res.status === 200) {
+      if (res.data?.token){
+        localStorage.setItem("auth_token", res.data.tokn);
+      }
       window.location.href = "/history";
     } else {
       setError(res.message || "เบอร์หรือรหัสผ่านผิด");

@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { authGet } from "@/lib/authApi";
 import OrderCard from "@/components/user/OrderCard";
 import { Filter } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 export default function UserOrdersPage() {
+  const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const [orders, setOrders] = useState([]);
@@ -28,6 +29,11 @@ export default function UserOrdersPage() {
   };
 
   useEffect(() => {
+   const token = localStorage.getItem("auth_token");
+    if (!token){
+      router.push("/user_auth/login");
+      return; 
+    }
     fetchOrders();
   }, []);
 
