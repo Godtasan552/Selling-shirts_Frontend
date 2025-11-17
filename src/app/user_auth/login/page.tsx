@@ -25,14 +25,14 @@ export default function LoginPage() {
       phone,
       password,
     });
-
+    console.log(res);
     if (res.status === 200) {
       if (res.data?.token){
         localStorage.setItem("auth_token", res.data.tokn);
       }
       window.location.href = "/history";
     } else {
-      setError(res.message || "เบอร์หรือรหัสผ่านผิด");
+      setError(res.data?.message || "เบอร์หรือรหัสผ่านผิด");
     }
   };
   const handleGoogleLogin = () => {
