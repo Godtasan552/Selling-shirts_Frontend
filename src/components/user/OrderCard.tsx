@@ -32,8 +32,11 @@ export default function OrderCard({ order }: any) {
 
       <div className="mt-2 text-sm text-gray-600">
         <p>วันที่สั่งซื้อ: {new Date(order.createdAt).toLocaleString()}</p>
-        <p>ยอดรวม: {order.total} บาท</p>
+
+        {/* ใช้ totalPrice แทน total */}
+        <p>ยอดรวม: {order.totalPrice.toLocaleString()} บาท</p>
       </div>
     </div>
   );
 }
+

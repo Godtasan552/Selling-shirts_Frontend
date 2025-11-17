@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import LogoutButton from "@/components/auth_user/LogoutButton";
 
 export default function HomePage() {
   return (
@@ -37,6 +38,10 @@ export default function HomePage() {
 
         </Link>
       </div>
+      {/* Logout */}
+    <div className="card-actions justify-end">
+  <LogoutButton />
+</div>
    <div className="card-actions justify-end">
         <Link href="/history">
             <button className="btn btn-outline btn-black text-black hover:scale-105 transition-transform duration-300">
