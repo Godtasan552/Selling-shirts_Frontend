@@ -11,3 +11,20 @@ export async function post(url: string, body: any) {
     ...data
   };
 }
+export async function authGet(url: string) {
+  const token = document.cookie
+    .split("; ")
+    .find((c) => c.startsWith("auth_token="))
+    ?.split("=")[1];
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  const data = await res.json();
+  return { status: res.status, ...data };
+}

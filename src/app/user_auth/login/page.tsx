@@ -27,7 +27,7 @@ export default function LoginPage() {
     });
 
     if (res.success) {
-      window.location.href = "/";
+      window.location.href = "/history";
     } else {
       setError(res.message || "เบอร์หรือรหัสผ่านผิด");
     }
