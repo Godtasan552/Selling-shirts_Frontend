@@ -3,8 +3,8 @@ import Link from 'next/link';
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex flex-col items-center justify-center p-8 space-y-8">
-      
-      
+
+
 
       {/* Main Card */}
       <div className="card w-full max-w-md bg-gradient-to-br from-purple-500 to-indigo-600 shadow-2xl rounded-xl animate__animated animate__fadeInUp">
@@ -20,7 +20,14 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-
+      {/* Button go to register page */}
+      <div className="card-actions justify-end">
+        <Link href="/user_auth/register">
+          <button className="btn btn-outline btn-white hover:scale-105 transition-transform duration-300">
+            Register
+          </button>
+        </Link>
+      </div>
       {/* Alert */}
       <div className="alert alert-success shadow-lg rounded-lg animate__animated animate__fadeInDown w-full max-w-md">
         <div>
@@ -43,7 +50,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      
+
 
     </div>
   );
