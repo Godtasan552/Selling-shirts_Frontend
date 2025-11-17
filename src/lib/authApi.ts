@@ -21,7 +21,16 @@ export const post = async (url: string, body: any) => {
     };
   }
 };
+export async function authGetCookie(url: string) {
+  const res = await fetch(url, {
+    method: "GET",
+    credentials: "include", // ใช้ cookie เท่านั้น
+    cache: "no-store",
+  });
 
+  const data = await res.json();
+  return { status: res.status, ...data };
+}
  
 export async function authGet(url: string) {
   // 1) พยายามดึง token จาก cookie ก่อน

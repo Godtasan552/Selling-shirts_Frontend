@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { authGet } from "@/lib/authApi";
+import { authGetCookie } from "@/lib/authApi";
 import OrderCard from "@/components/user/OrderCard";
 import { Filter } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -13,27 +14,35 @@ export default function UserOrdersPage() {
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const fetchOrders = async (s?: string) => {
-    setLoading(true);
-    const url = s
-      ? `${API_URL}/orders/user?status=${s}`
-      : `${API_URL}/orders/user`;
+const fetchOrders = async (s?: string) => {
+  setLoading(true);
 
-    const res = await authGet(url);
+  const url = s
+    ? `${API_URL}/orders/user?status=${s}`
+    : `${API_URL}/orders/user`;
 
-    setLoading(false);
+  const localToken = localStorage.getItem("auth_token");
 
-    if (res.status === 200) {
-      setOrders(res.orders);
-    }
-  };
+  // มี token = login ด้วยเบอร์มือถือ
+  let res;
+  if (localToken) {
+    res = await authGet(url);
+  } else {
+    // ไม่มี token = อาจเป็น Google Login → ใช้ cookie แทน
+    res = await authGetCookie(url);
+  }
+
+  setLoading(false);
+
+  if (res.status === 200) {
+    setOrders(res.orders);
+  } else if (res.status === 401) {
+    router.push("/user_auth/login");
+  }
+};
+
 
   useEffect(() => {
-   const token = localStorage.getItem("auth_token");
-    if (!token){
-      router.push("/user_auth/login");
-      return; 
-    }
     fetchOrders();
   }, []);
 
