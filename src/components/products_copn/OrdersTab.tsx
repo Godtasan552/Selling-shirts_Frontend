@@ -108,8 +108,34 @@ function OrderCard({
   onReject,
   onUpdateStatus,
 }: OrderCardProps) {
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
   const statusConfig =
     ORDER_STATUS[order.status as keyof typeof ORDER_STATUS];
+
+  const handleConfirm = async () => {
+    try {
+      setIsConfirming(true);
+      await onConfirm();
+    } catch (error) {
+      console.error('Confirm error:', error);
+      alert('Error confirming order');
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      setIsRejecting(true);
+      await onReject();
+    } catch (error) {
+      console.error('Reject error:', error);
+      alert('Error rejecting order');
+    } finally {
+      setIsRejecting(false);
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
@@ -180,27 +206,30 @@ function OrderCard({
           {order.status === 'verifying_payment' && order.paymentSlip && (
             <div className="border-t pt-4">
               <p className="font-semibold text-gray-900 mb-3">Payment Slip</p>
-              <div className="relative w-32 h-32 mb-3">
+              <div className="relative w-32 h-32 mb-3 bg-gray-100 rounded border border-gray-300 overflow-hidden">
                 <Image
                   src={order.paymentSlip}
                   alt="Payment slip"
                   fill
-                  className="object-cover rounded border border-gray-300"
+                  className="object-cover rounded"
                   priority={false}
+                  onError={() => console.log('Failed to load image:', order.paymentSlip)}
                 />
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={onConfirm}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center justify-center gap-2 text-sm font-medium transition-colors"
+                  onClick={handleConfirm}
+                  disabled={isConfirming}
+                  className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded flex items-center justify-center gap-2 text-sm font-medium transition-colors"
                 >
-                  <Check size={18} /> Confirm
+                  <Check size={18} /> {isConfirming ? 'Confirming...' : 'Confirm'}
                 </button>
                 <button
-                  onClick={onReject}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded flex items-center justify-center gap-2 text-sm font-medium transition-colors"
+                  onClick={handleReject}
+                  disabled={isRejecting}
+                  className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded flex items-center justify-center gap-2 text-sm font-medium transition-colors"
                 >
-                  <X size={18} /> Reject
+                  <X size={18} /> {isRejecting ? 'Rejecting...' : 'Reject'}
                 </button>
               </div>
             </div>

@@ -11,7 +11,6 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const isLoginPage = pathname === '/admin/login';
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
@@ -19,20 +18,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   // Authentication checking
   useEffect(() => {
     const checkAuth = async () => {
-      // If it's login page and already has token → redirect to dashboard
-      if (isLoginPage) {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-          router.push('/admin/dashboard');
-        }
-        setIsChecking(false);
-        return;
-      }
-
-      // If it's not login page → check token
+      // Check token
       const token = localStorage.getItem('accessToken');
       if (!token) {
-        router.push('/admin/login');
+        router.push('/admin_login');
         setIsChecking(false);
         return;
       }
@@ -42,21 +31,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     };
 
     checkAuth();
-  }, [isLoginPage, router]);
+  }, [router, pathname]);
 
   const handleLogout = () => {
+    // ลบข้อมูลทั้งหมด
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('admin');
     localStorage.removeItem('adminToken');
 
-    router.push('/admin/login');
-  };
+    // Reset state
+    setIsAuthenticated(false);
+    setIsChecking(false);
 
-  // If login page → show children only
-  if (isLoginPage) {
-    return <>{children}</>;
-  }
+    // Redirect ไปหน้า login
+    router.push('/admin_login');
+  };
 
   // During authentication check
   if (isChecking) {
@@ -75,7 +65,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return null;
   }
 
-  // If authenticated (not login page) → show layout
+  // If authenticated → show layout
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
