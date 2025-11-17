@@ -1,7 +1,7 @@
 // ============================================
-// 5. components/admin/ProductsTab.tsx - NEW
+// components/admin/ProductsTab.tsx - FIXED
 // ============================================
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Check, AlertCircle } from 'lucide-react';
 import type { Product, FormDataType } from '@/types/product_admin';
 import { PRODUCT_STATUS } from '@/types/product_admin';
 import { ProductModal } from './ProductModal';
@@ -14,6 +14,7 @@ interface ProductsTabProps {
   onCreateProduct: (data: FormDataType) => Promise<boolean>;
   onUpdateProduct: (productId: string, data: FormDataType) => Promise<boolean>;
   onDeleteProduct: (productId: string) => Promise<boolean>;
+  onUpdateProductStatus?: (productId: string, status: string) => Promise<boolean>;
 }
 
 export function ProductsTab({
@@ -23,11 +24,14 @@ export function ProductsTab({
   onCreateProduct,
   onUpdateProduct,
   onDeleteProduct,
+  onUpdateProductStatus,
 }: ProductsTabProps) {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [modalError, setModalError] = useState('');
   const [isModalLoading, setIsModalLoading] = useState(false);
+  const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
+  const [statusError, setStatusError] = useState('');
 
   const handleSaveProduct = async (formData: FormDataType) => {
     setIsModalLoading(true);
@@ -44,6 +48,27 @@ export function ProductsTab({
       setModalError('Failed to save product');
     }
     setIsModalLoading(false);
+  };
+
+  const handleUpdateStatus = async (productId: string, newStatus: string) => {
+    if (!onUpdateProductStatus) {
+      setStatusError('Status update not available');
+      return;
+    }
+
+    try {
+      setUpdatingStatusId(productId);
+      setStatusError('');
+      const success = await onUpdateProductStatus(productId, newStatus);
+      if (!success) {
+        setStatusError('Failed to update status');
+      }
+    } catch (err) {
+      setStatusError('Error updating status');
+      console.error(err);
+    } finally {
+      setUpdatingStatusId(null);
+    }
   };
 
   return (
@@ -65,6 +90,13 @@ export function ProductsTab({
       {error && (
         <div className="bg-red-50 border border-red-200 p-4 rounded mb-4">
           <p className="text-red-800">{error}</p>
+        </div>
+      )}
+
+      {statusError && (
+        <div className="bg-orange-50 border border-orange-200 p-4 rounded mb-4 flex gap-2">
+          <AlertCircle size={20} className="text-orange-600 flex-shrink-0 mt-0.5" />
+          <p className="text-orange-800">{statusError}</p>
         </div>
       )}
 
@@ -99,24 +131,44 @@ export function ProductsTab({
                   <td className="px-6 py-4 text-sm text-gray-900">{product.name}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{product.category}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{product.variants?.length || 0}</td>
+                  
+                  {/* ✨ Status with dropdown */}
                   <td className="px-6 py-4 text-sm">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${PRODUCT_STATUS[product.status as keyof typeof PRODUCT_STATUS]?.color || 'bg-gray-100'}`}>
-                      {PRODUCT_STATUS[product.status as keyof typeof PRODUCT_STATUS]?.label || product.status}
-                    </span>
+                    <select
+                      value={product.status}
+                      onChange={(e) => handleUpdateStatus(product._id, e.target.value)}
+                      disabled={updatingStatusId === product._id}
+                      className={`px-3 py-1 rounded-full text-xs font-medium border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        PRODUCT_STATUS[product.status as keyof typeof PRODUCT_STATUS]?.color || 'bg-gray-100'
+                      } ${updatingStatusId === product._id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {Object.entries(PRODUCT_STATUS).map(([key, val]) => (
+                        <option key={key} value={key}>
+                          {val.label}
+                        </option>
+                      ))}
+                    </select>
+                    {updatingStatusId === product._id && (
+                      <span className="ml-2 text-xs text-gray-500">Updating...</span>
+                    )}
                   </td>
+
+                  {/* Actions */}
                   <td className="px-6 py-4 text-sm flex gap-3">
                     <button
                       onClick={() => {
                         setEditingProduct(product);
                         setShowModal(true);
                       }}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-blue-600 hover:text-blue-900 transition-colors"
+                      title="Edit product"
                     >
                       <Edit size={18} />
                     </button>
                     <button
                       onClick={() => onDeleteProduct(product._id)}
-                      className="text-red-600 hover:text-red-900"
+                      className="text-red-600 hover:text-red-900 transition-colors"
+                      title="Delete product"
                     >
                       <Trash2 size={18} />
                     </button>

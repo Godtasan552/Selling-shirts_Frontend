@@ -1,5 +1,5 @@
 // ============================================
-// app/admin/products/page.tsx - MAIN PAGE
+// app/admin/products/page.tsx - FIXED
 // ============================================
 'use client';
 
@@ -113,6 +113,7 @@ export default function AdminDashboard() {
                 onCreateProduct={productMgmt.createProduct}
                 onUpdateProduct={productMgmt.updateProduct}
                 onDeleteProduct={productMgmt.deleteProduct}
+                onUpdateProductStatus={productMgmt.updateProductStatus}
               />
             )}
 

@@ -1,5 +1,5 @@
 // ============================================
-// 1. hooks/useProductManagement.ts - NEW
+// hooks/useProductManagement.ts - FIXED
 // ============================================
 import { useState, useCallback } from 'react';
 import type { Product, FormDataType } from '@/types/product_admin';
@@ -12,6 +12,7 @@ interface UseProductManagementReturn {
   createProduct: (data: FormDataType) => Promise<boolean>;
   updateProduct: (productId: string, data: FormDataType) => Promise<boolean>;
   deleteProduct: (productId: string) => Promise<boolean>;
+  updateProductStatus: (productId: string, status: string) => Promise<boolean>;
 }
 
 export function useProductManagement(token: string, apiUrl: string): UseProductManagementReturn {
@@ -102,6 +103,37 @@ export function useProductManagement(token: string, apiUrl: string): UseProductM
     }
   }, [token, apiUrl, fetchProducts]);
 
+  // ✨ NEW: Update product status only
+  const updateProductStatus = useCallback(async (productId: string, status: string): Promise<boolean> => {
+    try {
+      setError('');
+      const res = await fetch(`${apiUrl}/api/products/${productId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        setError(errData.message || 'Failed to update product status');
+        return false;
+      }
+
+      // Update local state
+      setProducts(prev =>
+        prev.map(p => p._id === productId ? { ...p, status } : p)
+      );
+      return true;
+    } catch (err) {
+      setError('Error updating product status');
+      console.error(err);
+      return false;
+    }
+  }, [token, apiUrl]);
+
   const deleteProduct = useCallback(async (productId: string): Promise<boolean> => {
     if (!window.confirm('Are you sure you want to delete this product?')) return false;
 
@@ -129,5 +161,14 @@ export function useProductManagement(token: string, apiUrl: string): UseProductM
     }
   }, [token, apiUrl, fetchProducts]);
 
-  return { products, loading, error, fetchProducts, createProduct, updateProduct, deleteProduct };
+  return { 
+    products, 
+    loading, 
+    error, 
+    fetchProducts, 
+    createProduct, 
+    updateProduct, 
+    deleteProduct,
+    updateProductStatus, // ✨ Export new function
+  };
 }
