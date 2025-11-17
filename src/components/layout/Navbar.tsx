@@ -25,8 +25,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white p-4 shadow-md">
-      <div className="container mx-auto flex justify-between items-center">
+    <nav className="bg-white shadow-md">
+      <div className="flex justify-between items-center px-4 py-4">
         <div className="text-gray-800 text-lg font-bold">
           <Link href="/" className="text-gray-800 text-lg font-bold">
             Selling Shirts
