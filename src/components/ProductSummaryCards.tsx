@@ -35,13 +35,13 @@ const ProductSummaryCards: React.FC = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12 mb-8">
       <StatCard 
         title="จำนวนเสื้อทั้งหมด" 
-        value={stats?.totalInventory ?? 0} 
+        value={stats?.totalStock ?? 0} 
         loading={loading}
         colorClass="text-secondary"
       />
       <StatCard 
         title="จำนวนเสื้อที่ขายไปแล้ว" 
-        value={stats?.totalShirtsSold ?? 0} 
+        value={stats?.totalSold ?? 0} 
         loading={loading}
         colorClass="text-accent"
       />
