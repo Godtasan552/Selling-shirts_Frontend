@@ -5,6 +5,8 @@ import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
+import SizeCard from '../components/SizeCard';
+import ProductSummaryCards from '../components/ProductSummaryCards';
 
 export default function HomePage() {
   // Placeholder product data
@@ -15,6 +17,21 @@ export default function HomePage() {
       description: 'เสื้อยืดคอตตอน 100% สีสันสดใส สวมใส่สบาย ระบายอากาศได้ดี เหมาะสำหรับทุกวัน',
       price: '฿195',
       imageUrl: '/shirt_color.jpg',
+      type: 'colored',
+      sizes: [
+        { size: 'S', stock: 0 },
+        { size: 'M', stock: 0 },
+        { size: 'L', stock: 0 },
+        { size: 'XL', stock: 0 },
+        { size: '2XL', stock: 0 },
+        { size: '3XL', stock: 0 },
+        { size: '4XL', stock: 0 },
+        { size: '5XL', stock: 0 },
+        { size: '6XL', stock: 0 },
+        { size: '8XL', stock: 0 },
+        { size: 'SS', stock: 0 },
+        { size: 'SSS', stock: 0 },
+      ],
     },
     {
       id: 2,
@@ -22,6 +39,21 @@ export default function HomePage() {
       description: 'เสื้อโปโลสีดำสุภาพ เนื้อผ้าดีเยี่ยม สำหรับสวมใส่ในโอกาสแสดงความอาลัยอย่างเป็นทางการ',
       price: '฿195', // ปรับราคาให้ต่างกันเล็กน้อยเพื่อความสมจริง
       imageUrl: '/shirt_mourning.jpg',
+      type: 'mourning',
+      sizes: [
+        { size: 'S', stock: 0 },
+        { size: 'M', stock: 0 },
+        { size: 'L', stock: 0 },
+        { size: 'XL', stock: 0 },
+        { size: '2XL', stock: 0 },
+        { size: '3XL', stock: 0 },
+        { size: '4XL', stock: 0 },
+        { size: '5XL', stock: 0 },
+        { size: '6XL', stock: 0 },
+        { size: '8XL', stock: 0 },
+        { size: 'SS', stock: 0 },
+        { size: 'SSS', stock: 0 },
+      ],
     },
   ];
 
@@ -116,6 +148,7 @@ export default function HomePage() {
                     <span className="badge badge-lg badge-secondary font-semibold mb-2">HOT!</span>
                     <h2 className="card-title text-4xl font-extrabold text-primary-focus">{product.name}</h2>
                     <p className="py-4 text-lg text-base-content/80">{product.description}</p>
+                    <SizeCard productType={product.type as 'colored' | 'mourning'} sizes={product.sizes} />
                     <div className="flex justify-between items-center w-full mt-4 flex-col lg:flex-row gap-4">
                         <p className="text-4xl font-extrabold text-secondary">
                             {product.price}
@@ -145,6 +178,9 @@ export default function HomePage() {
             ดูสินค้าทั้งหมด & สั่งซื้อ 🛍️
           </Link>
         </div>
+
+        {/* Product Summary Cards */}
+        <ProductSummaryCards />
       </main>
       <Footer />
     </div>
