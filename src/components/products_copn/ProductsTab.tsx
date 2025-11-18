@@ -1,9 +1,10 @@
 // components/admin/ProductsTab.tsx
 // ============================================
-import { Plus, Edit, Trash2, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, AlertCircle, Eye } from 'lucide-react';
 import type { Product, FormDataType } from '@/types/product_admin';
 import { PRODUCT_STATUS } from '@/types/product_admin';
 import { ProductModal } from './ProductModal';
+import { ProductDetailsModal } from './ProductDetailsModal';
 import { useState } from 'react';
 
 interface ProductsTabProps {
@@ -31,6 +32,8 @@ export function ProductsTab({
   const [isModalLoading, setIsModalLoading] = useState(false);
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
   const [statusError, setStatusError] = useState('');
+  const [detailsProduct, setDetailsProduct] = useState<Product | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const handleSaveProduct = async (formData: FormDataType) => {
     setIsModalLoading(true);
@@ -68,6 +71,11 @@ export function ProductsTab({
     } finally {
       setUpdatingStatusId(null);
     }
+  };
+
+  const handleViewDetails = (product: Product) => {
+    setDetailsProduct(product);
+    setShowDetailsModal(true);
   };
 
   return (
@@ -108,6 +116,12 @@ export function ProductsTab({
         onSave={handleSaveProduct}
       />
 
+      <ProductDetailsModal
+        isOpen={showDetailsModal}
+        product={detailsProduct}
+        onClose={() => setShowDetailsModal(false)}
+      />
+
       {loading ? (
         <div className="text-center py-8">Loading...</div>
       ) : products.length === 0 ? (
@@ -126,7 +140,11 @@ export function ProductsTab({
             </thead>
             <tbody className="divide-y">
               {products.map((product) => (
-                <tr key={product._id} className="hover:bg-gray-50">
+                <tr 
+                  key={product._id} 
+                  className="hover:bg-gray-50 cursor-pointer transition-colors"
+                  onClick={() => handleViewDetails(product)}
+                >
                   <td className="px-6 py-4 text-sm text-gray-900 font-medium">{product.name}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{product.category}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{product.variants?.length || 0}</td>
@@ -153,7 +171,18 @@ export function ProductsTab({
 
                   <td className="px-6 py-4 text-sm flex gap-3">
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewDetails(product);
+                      }}
+                      className="text-green-600 hover:text-green-900 transition-colors"
+                      title="View details"
+                    >
+                      <Eye size={18} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setEditingProduct(product);
                         setShowModal(true);
                       }}
@@ -163,7 +192,10 @@ export function ProductsTab({
                       <Edit size={18} />
                     </button>
                     <button
-                      onClick={() => onDeleteProduct(product._id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteProduct(product._id);
+                      }}
                       className="text-red-600 hover:text-red-900 transition-colors"
                       title="Delete product"
                     >

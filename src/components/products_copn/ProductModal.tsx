@@ -35,9 +35,8 @@ interface ProductModalProps {
 const CATEGORIES = ['t-shirt', 'polo', 'hoodie', 'jacket', 'other'];
 const SIZES = ['S', 'SS', 'SSS', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL', '9XL', '10XL'];
 
-// ทดสอบภาษาไทย
-const TEST_THAI = 'สีแดง';
-const THAI_COLORS = ['แดง', 'เขียว', 'น้ำเงิน', 'ดำ', 'ขาว'];
+
+
 const PRODUCT_STATUS = {
   active: { label: 'Active', color: 'success' },
   inactive: { label: 'Inactive', color: 'warning' },

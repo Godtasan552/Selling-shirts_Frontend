@@ -19,6 +19,10 @@ export interface Product {
   status: string;
   variants: Variant[];
   imageUrl?: string; // URL ของรูปที่อยู่ใน database
+  createdBy?: string; // ผู้สร้างสินค้า
+  updatedBy?: string; // ผู้อัพเดตสินค้า
+  createdAt?: string | Date; // เวลาสร้าง (ISO string หรือ Date object)
+  updatedAt?: string | Date; // เวลาอัพเดต (ISO string หรือ Date object)
 }
 
 // Form data type (ไม่มี imageUrl เพราะส่งเป็น File แยก)
@@ -67,4 +71,4 @@ export const ORDER_STATUS = {
 } as const;
 
 export const CATEGORIES = ['t-shirt', 'polo', 'hoodie', 'jacket', 'other'] as const;
-export const SIZES = ['S', 'SS', 'SSS', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'] as const;
+export const SIZES = ['S', 'SS', 'SSS', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL', '9XL', '10XL'] as const;
