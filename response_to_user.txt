@@ -1,0 +1,21 @@
+สวัสดีครับ!
+
+ผมได้ตรวจสอบไฟล์ `src/components/ProductSummaryCards.tsx` ของคุณแล้ว และพบว่าโค้ดในไฟล์นั้นได้แก้ไข `import` statement เป็น `import { usePublicStats } from '../hooks/usePublicStats';` ซึ่งเป็นแบบ relative path ที่ถูกต้องแล้วครับ
+
+แต่จากข้อความ error ที่คุณให้มา (`Module not found: Can't resolve '@/hooks/usePublicStats'`) ยังคงแสดงว่ามีการใช้ alias path (`@/hooks/usePublicStats`) อยู่ในบรรทัดที่ 4 ของไฟล์เดียวกัน
+
+ความขัดแย้งนี้บ่งชี้ว่าปัญหาอาจเกิดจาก cache ของ Next.js ที่ยังคงใช้ไฟล์เวอร์ชันเก่าอยู่ครับ
+
+**วิธีแก้ไข:**
+
+1.  **ล้าง Next.js cache:**
+    *   เปิด Terminal หรือ Command Prompt ในโปรเจกต์ของคุณ
+    *   รันคำสั่ง: `rmdir /s /q .next` (สำหรับ Windows) หรือ `rm -rf .next` (สำหรับ macOS/Linux)
+2.  **ติดตั้ง dependencies ใหม่ (ถ้าจำเป็น):**
+    *   รันคำสั่ง: `npm install` หรือ `yarn install`
+3.  **รันโปรเจกต์ใหม่:**
+    *   รันคำสั่ง: `npm run dev` หรือ `yarn dev`
+
+หลังจากทำตามขั้นตอนเหล่านี้แล้ว โปรเจกต์ของคุณควรจะ build ได้สำเร็จและแสดงผล card ที่หายไปกลับมาครับ
+
+หากยังพบปัญหาอยู่ โปรดแจ้งให้ผมทราบพร้อมกับข้อความ error ล่าสุดนะครับ

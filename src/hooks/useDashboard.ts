@@ -65,6 +65,7 @@ export interface DashboardStats {
   pendingOrders: number;
   totalInventory: number;
   averageProductPrice: number;
+  totalShirtsSold: number;
 }
 
 export interface OrderItem {
@@ -162,6 +163,12 @@ const calculateStats = (
     ['pending_payment', 'verifying_payment'].includes(o.status)
   ).length;
 
+  const totalShirtsSold = orders
+    .filter(o => ['paid', 'shipping', 'completed'].includes(o.status))
+    .reduce((sum, order) => 
+      sum + order.items.reduce((itemSum, item) => itemSum + (item.quantity || 0), 0), 
+    0);
+
   return {
     admins: {
       total: totalAdmins + totalStaff,
@@ -185,6 +192,7 @@ const calculateStats = (
     pendingOrders,
     totalInventory,
     averageProductPrice: averagePrice,
+    totalShirtsSold,
   };
 };
 

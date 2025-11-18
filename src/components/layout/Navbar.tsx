@@ -32,10 +32,11 @@ const Navbar = () => {
             Selling Shirts
           </Link>
         </div>
+        
         <div className="flex items-center">
           <div className="relative">
             {/* เชื่อม หน้าประวัติการสั่งซื้อ ตรงนี้ */}
-            <Link href="/order-history" className="text-gray-800 mr-4">
+            <Link href="/history" className="text-gray-800 mr-4">
               ประวัติการสั่งซื้อ
             </Link>
           </div>
@@ -45,9 +46,9 @@ const Navbar = () => {
             </button>
           ) : (
             //  ลิงค์หน้า login ตรงนี้
-            <button onClick={handleLogin} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            <Link href="/user_auth/login" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
               Login
-            </button>
+            </Link>
           )}
         </div>
       </div>
