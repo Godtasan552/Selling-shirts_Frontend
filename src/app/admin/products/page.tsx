@@ -5,6 +5,7 @@ import { useProductManagement } from '@/hooks/useProductManagement';
 import { useOrderManagement } from '@/hooks/useOrderManagement';
 import { ProductsTab } from '@/components/products_copn/ProductsTab';
 import { OrdersTab } from '@/components/products_copn/OrdersTab';
+import { Product } from '../../../types/product_admin';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -63,7 +64,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Admin Product</h1>
         </div>
       </div>
 
