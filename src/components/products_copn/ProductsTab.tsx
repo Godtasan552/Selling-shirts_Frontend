@@ -52,7 +52,9 @@ export function ProductsTab({
     setIsModalLoading(false);
   };
 
-  const handleUpdateStatus = async (productId: string, newStatus: string) => {
+  const handleUpdateStatus = async (e: React.ChangeEvent<HTMLSelectElement>, productId: string, newStatus: string) => {
+    e.stopPropagation();
+
     if (!onUpdateProductStatus) {
       setStatusError('Status update not available');
       return;
@@ -120,7 +122,12 @@ export function ProductsTab({
         isOpen={showDetailsModal}
         product={detailsProduct}
         onClose={() => setShowDetailsModal(false)}
+        onEdit={(product) => {
+          setEditingProduct(product); // เตรียมข้อมูลให้ modal แก้ไข
+          setShowModal(true);          // เปิด modal แก้ไข
+        }}
       />
+
 
       {loading ? (
         <div className="text-center py-8">Loading...</div>
@@ -140,23 +147,23 @@ export function ProductsTab({
             </thead>
             <tbody className="divide-y">
               {products.map((product) => (
-                <tr 
-                  key={product._id} 
+                <tr
+                  key={product._id}
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
                   onClick={() => handleViewDetails(product)}
                 >
                   <td className="px-6 py-4 text-sm text-gray-900 font-medium">{product.name}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{product.category}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{product.variants?.length || 0}</td>
-                  
+
                   <td className="px-6 py-4 text-sm">
                     <select
                       value={product.status}
-                      onChange={(e) => handleUpdateStatus(product._id, e.target.value)}
+                      onChange={(e) => handleUpdateStatus(e, product._id, e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
                       disabled={updatingStatusId === product._id}
-                      className={`px-3 py-1 rounded-full text-xs font-medium border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        PRODUCT_STATUS[product.status as keyof typeof PRODUCT_STATUS]?.color || 'bg-gray-100'
-                      } ${updatingStatusId === product._id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`px-3 py-1 rounded-full text-xs font-medium border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 ${PRODUCT_STATUS[product.status as keyof typeof PRODUCT_STATUS]?.color || 'bg-gray-100'
+                        } ${updatingStatusId === product._id ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       {Object.entries(PRODUCT_STATUS).map(([key, val]) => (
                         <option key={key} value={key}>
