@@ -322,10 +322,21 @@ function PaymentSlipImage({
 }) {
   const [imgError, setImgError] = useState(false);
 
+  const handleClick = (e: React.MouseEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      // Ctrl+Click หรือ Cmd+Click เพื่อเปิดในแท็บใหม่
+      window.open(src, '_blank');
+    } else {
+      // Click ปกติเพื่อเปิด modal
+      onClickImage();
+    }
+  };
+
   return (
     <div 
-      onClick={onClickImage}
+      onClick={handleClick}
       className="relative w-full max-w-[400px] h-72 mb-4 bg-gray-100 rounded-lg border border-gray-300 overflow-hidden shadow cursor-pointer hover:opacity-80 transition-opacity"
+      title="Click to view • Ctrl+Click to open in new tab"
     >
       {!imgError ? (
         <Image
