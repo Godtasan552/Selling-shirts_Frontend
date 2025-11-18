@@ -1,9 +1,6 @@
-// ============================================
-// app/admin/products/page.tsx - FIXED
-// ============================================
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useProductManagement } from '@/hooks/useProductManagement';
 import { useOrderManagement } from '@/hooks/useOrderManagement';
 import { ProductsTab } from '@/components/products_copn/ProductsTab';
@@ -58,6 +55,7 @@ export default function AdminDashboard() {
     };
 
     fetchData();
+    // ✅ Only depend on token, not on productMgmt/orderMgmt which change on every render
   }, [token]);
 
   return (

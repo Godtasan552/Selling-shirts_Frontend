@@ -38,7 +38,13 @@ export function useProductManagement(token: string, apiUrl: string): UseProductM
     }
   }, [token, apiUrl]);
 
-  const createProduct = useCallback(async (formData: FormDataType): Promise<boolean> => {
+  // ✅ FIXED: Removed imageFile parameter - frontend handles images
+  const createProduct = useCallback(async (
+    formData: FormDataType
+  ): Promise<boolean> => {
+    console.log('🎯 createProduct called with:');
+    console.log('   - Data:', formData);
+
     if (!formData.name || !formData.description) {
       setError('Name and description are required');
       return false;
@@ -47,6 +53,9 @@ export function useProductManagement(token: string, apiUrl: string): UseProductM
     try {
       setLoading(true);
       setError('');
+
+      console.log('📡 Sending POST to:', `${apiUrl}/api/products`);
+
       const res = await fetch(`${apiUrl}/api/products`, {
         method: 'POST',
         headers: {
@@ -56,27 +65,44 @@ export function useProductManagement(token: string, apiUrl: string): UseProductM
         body: JSON.stringify(formData),
       });
 
+      console.log('📥 Response status:', res.status);
+
       if (!res.ok) {
         const errData = await res.json();
+        console.error('❌ Error response:', errData);
         setError(errData.message || 'Failed to save product');
         return false;
       }
 
+      const result = await res.json();
+      console.log('✅ Product created successfully:', result);
+
       await fetchProducts();
       return true;
     } catch (err) {
+      console.error('❌ Error in createProduct:', err);
       setError('Error creating product');
-      console.error(err);
       return false;
     } finally {
       setLoading(false);
     }
   }, [token, apiUrl, fetchProducts]);
 
-  const updateProduct = useCallback(async (productId: string, formData: FormDataType): Promise<boolean> => {
+  // ✅ FIXED: Removed imageFile parameter
+  const updateProduct = useCallback(async (
+    productId: string, 
+    formData: FormDataType
+  ): Promise<boolean> => {
+    console.log('🎯 updateProduct called with:');
+    console.log('   - Product ID:', productId);
+    console.log('   - Data:', formData);
+
     try {
       setLoading(true);
       setError('');
+
+      console.log('📡 Sending PUT to:', `${apiUrl}/api/products/${productId}`);
+
       const res = await fetch(`${apiUrl}/api/products/${productId}`, {
         method: 'PUT',
         headers: {
@@ -86,24 +112,30 @@ export function useProductManagement(token: string, apiUrl: string): UseProductM
         body: JSON.stringify(formData),
       });
 
+      console.log('📥 Response status:', res.status);
+
       if (!res.ok) {
         const errData = await res.json();
+        console.error('❌ Error response:', errData);
         setError(errData.message || 'Failed to update product');
         return false;
       }
 
+      const result = await res.json();
+      console.log('✅ Product updated successfully:', result);
+
       await fetchProducts();
       return true;
     } catch (err) {
+      console.error('❌ Error in updateProduct:', err);
       setError('Error updating product');
-      console.error(err);
       return false;
     } finally {
       setLoading(false);
     }
   }, [token, apiUrl, fetchProducts]);
 
-  // ✨ NEW: Update product status only
+  // ✨ Update product status only
   const updateProductStatus = useCallback(async (productId: string, status: string): Promise<boolean> => {
     try {
       setError('');
@@ -169,6 +201,6 @@ export function useProductManagement(token: string, apiUrl: string): UseProductM
     createProduct, 
     updateProduct, 
     deleteProduct,
-    updateProductStatus, // ✨ Export new function
+    updateProductStatus,
   };
 }

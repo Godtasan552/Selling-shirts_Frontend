@@ -1,9 +1,9 @@
 // ============================================
-// components/admin/OrdersTab.tsx - FIXED
+// components/admin/OrdersTab.tsx
 // ============================================
+import { useState } from 'react';
 import { ChevronDown, Check, X } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
 import type { Order } from '@/types/product_admin';
 import { ORDER_STATUS } from '@/types/product_admin';
 
@@ -34,7 +34,6 @@ export function OrdersTab({
 
   return (
     <div>
-      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Orders</h2>
         <select
@@ -51,14 +50,12 @@ export function OrdersTab({
         </select>
       </div>
 
-      {/* Error Message */}
       {error && (
         <div className="bg-red-50 border border-red-200 p-4 rounded-lg mb-4">
           <p className="text-red-800">{error}</p>
         </div>
       )}
 
-      {/* Loading State */}
       {loading ? (
         <div className="text-center py-12">
           <p className="text-gray-600">Loading orders...</p>
@@ -88,9 +85,6 @@ export function OrdersTab({
   );
 }
 
-// ============================================
-// OrderCard Component
-// ============================================
 interface OrderCardProps {
   order: Order;
   isExpanded: boolean;
@@ -139,7 +133,6 @@ function OrderCard({
 
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
-      {/* Header - Collapsible */}
       <div
         onClick={onToggle}
         className="p-4 cursor-pointer hover:bg-gray-50 flex justify-between items-center"
@@ -171,10 +164,8 @@ function OrderCard({
         </div>
       </div>
 
-      {/* Expanded Content */}
       {isExpanded && (
         <div className="border-t p-4 bg-gray-50 space-y-4">
-          {/* Order Items */}
           <div>
             <h4 className="font-semibold text-gray-900 mb-2">Items</h4>
             <div className="space-y-2">
@@ -187,7 +178,6 @@ function OrderCard({
             </div>
           </div>
 
-          {/* Order Details */}
           <div className="border-t pt-4">
             <div className="space-y-2">
               <p className="text-sm">
@@ -202,17 +192,17 @@ function OrderCard({
             </div>
           </div>
 
-          {/* Payment Slip Section - For verifying_payment */}
+          {/* 🆕 Payment Slip Image Display */}
           {order.status === 'verifying_payment' && order.paymentSlip && (
             <div className="border-t pt-4">
-              <p className="font-semibold text-gray-900 mb-3">Payment Slip</p>
-              <div className="relative w-32 h-32 mb-3 bg-gray-100 rounded border border-gray-300 overflow-hidden">
+              <p className="font-semibold text-gray-900 mb-3">📸 Payment Slip</p>
+              <div className="relative w-48 h-48 mb-4 bg-gray-100 rounded-lg border border-gray-300 overflow-hidden shadow">
                 <Image
                   src={order.paymentSlip}
                   alt="Payment slip"
                   fill
-                  className="object-cover rounded"
-                  priority={false}
+                  className="object-contain"
+                  priority={true}
                   onError={() => console.log('Failed to load image:', order.paymentSlip)}
                 />
               </div>
@@ -220,14 +210,14 @@ function OrderCard({
                 <button
                   onClick={handleConfirm}
                   disabled={isConfirming}
-                  className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded flex items-center justify-center gap-2 text-sm font-medium transition-colors"
+                  className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-colors"
                 >
                   <Check size={18} /> {isConfirming ? 'Confirming...' : 'Confirm'}
                 </button>
                 <button
                   onClick={handleReject}
                   disabled={isRejecting}
-                  className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded flex items-center justify-center gap-2 text-sm font-medium transition-colors"
+                  className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-colors"
                 >
                   <X size={18} /> {isRejecting ? 'Rejecting...' : 'Reject'}
                 </button>
@@ -235,7 +225,7 @@ function OrderCard({
             </div>
           )}
 
-          {/* Status Update Dropdown - For paid/shipping/completed */}
+          {/* Status Update Dropdown */}
           {['paid', 'shipping', 'completed'].includes(order.status) && (
             <div className="border-t pt-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
