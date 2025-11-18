@@ -33,7 +33,11 @@ interface ProductModalProps {
 }
 
 const CATEGORIES = ['t-shirt', 'polo', 'hoodie', 'jacket', 'other'];
-const SIZES = ['S', 'SS', 'SSS', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
+const SIZES = ['S', 'SS', 'SSS', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL', '9XL', '10XL'];
+
+// ทดสอบภาษาไทย
+const TEST_THAI = 'สีแดง';
+const THAI_COLORS = ['แดง', 'เขียว', 'น้ำเงิน', 'ดำ', 'ขาว'];
 const PRODUCT_STATUS = {
   active: { label: 'Active', color: 'success' },
   inactive: { label: 'Inactive', color: 'warning' },
@@ -47,6 +51,32 @@ const initialFormData: FormDataType = {
   status: 'active',
   variants: [{ size: 'M', color: '', sku: '', price: 0, quantity: 0 }],
 };
+
+// ฟังก์ชันสร้าง SKU อัตโนมัติ
+function generateSKU(category: string, size: string, color: string, allVariants: Variant[], currentIndex: number): string {
+  // หากยังไม่มีสี ให้ส่งคืน SKU ที่ว่าง
+  if (!color.trim()) {
+    return '';
+  }
+
+  // สร้าง SKU โดยใช้ตัวอักษรเต็มจาก category, size, color
+  const baseSKU = `${category.toUpperCase()}-${size.toUpperCase()}-${color.toUpperCase()}`;
+  
+  // นับจำนวน variant ที่มี SKU เดียวกัน (ยกเว้นตัวปัจจุบัน)
+  let matchingCount = 0;
+  for (let i = 0; i < allVariants.length; i++) {
+    if (i === currentIndex) continue;
+    const v = allVariants[i];
+    const variantBase = `${category.toUpperCase()}-${v.size.toUpperCase()}-${v.color.toUpperCase()}`;
+    if (variantBase === baseSKU) {
+      matchingCount++;
+    }
+  }
+  
+  // เพิ่มหมายเลข SKU เสมอ เพื่อให้มี uniqueness (เริ่มจาก 001)
+  const number = String(currentIndex + 1).padStart(3, '0');
+  return `${baseSKU}-${number}`;
+}
 
 function ProductModalForm({
   editingProduct,
@@ -74,20 +104,50 @@ function ProductModalForm({
     value: string | number
   ): void => {
     const newVariants = [...formData.variants];
-    newVariants[index] = {
+    const updatedVariant = {
       ...newVariants[index],
       [field]: field === 'price' || field === 'quantity' ? Number(value) : value,
     };
-    setFormData({ ...formData, variants: newVariants });
+
+    // อัปเดต SKU อัตโนมัติเมื่อเปลี่ยน size หรือ color
+    if (field === 'size' || field === 'color') {
+      updatedVariant.sku = generateSKU(
+        formData.category,
+        updatedVariant.size,
+        updatedVariant.color,
+        newVariants,
+        index
+      );
+    }
+
+    newVariants[index] = updatedVariant;
+    
+    // อัปเดต SKU ของ variant อื่นๆ ที่อาจได้รับผลกระทบ
+    const updatedAllVariants = newVariants.map((v, idx) => {
+      if (idx === index) return v;
+      return {
+        ...v,
+        sku: generateSKU(formData.category, v.size, v.color, newVariants, idx)
+      };
+    });
+
+    setFormData({ ...formData, variants: updatedAllVariants });
+  };
+
+  const handleCategoryChange = (newCategory: string): void => {
+    const newVariants = formData.variants.map((v, idx) => ({
+      ...v,
+      sku: generateSKU(newCategory, v.size, v.color, formData.variants, idx)
+    }));
+    setFormData({ ...formData, category: newCategory, variants: newVariants });
   };
 
   const handleAddVariant = (): void => {
+    const newVariant: Variant = { size: 'M', color: '', sku: '', price: 0, quantity: 0 };
+    const newVariants = [...formData.variants, newVariant];
     setFormData({
       ...formData,
-      variants: [
-        ...formData.variants,
-        { size: 'M', color: '', sku: '', price: 0, quantity: 0 },
-      ],
+      variants: newVariants,
     });
   };
 
@@ -96,9 +156,17 @@ function ProductModalForm({
       alert('At least one variant is required');
       return;
     }
+    const newVariants = formData.variants.filter((_, i) => i !== index);
+    
+    // อัปเดต SKU หลังลบ variant
+    const updatedVariants = newVariants.map((v, idx) => ({
+      ...v,
+      sku: generateSKU(formData.category, v.size, v.color, newVariants, idx)
+    }));
+    
     setFormData({
       ...formData,
-      variants: formData.variants.filter((_, i) => i !== index),
+      variants: updatedVariants,
     });
   };
 
@@ -120,7 +188,7 @@ function ProductModalForm({
     for (let i = 0; i < formData.variants.length; i++) {
       const v = formData.variants[i];
       if (!v.sku.trim()) {
-        alert(`Variant ${i + 1}: SKU is required`);
+        alert(`Variant ${i + 1}: SKU cannot be empty (please enter color)`);
         return;
       }
       if (v.price <= 0) {
@@ -199,7 +267,7 @@ function ProductModalForm({
             </label>
             <select
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              onChange={(e) => handleCategoryChange(e.target.value)}
               disabled={isLoading}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
@@ -392,14 +460,13 @@ function VariantRow({
         </div>
         
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">SKU</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">SKU (Auto)</label>
           <input
             type="text"
-            placeholder="SKU"
+            placeholder="Auto generated"
             value={variant.sku}
-            onChange={(e) => onVariantChange(index, 'sku', e.target.value)}
-            disabled={disabled}
-            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            disabled
+            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded bg-gray-100 text-gray-600 cursor-not-allowed font-mono text-xs"
           />
         </div>
         
