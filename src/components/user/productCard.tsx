@@ -49,13 +49,20 @@ export default function OrderProductCard({ product, onAdd }: any) {
       {/* Add button */}
       <button
         disabled={!selectedSku}
-        onClick={() =>
+        onClick={() =>{
+          const selectedVariant = product.variants.find((v: any) => v.sku === selectedSku);
+          if(!selectedVariant){
+            return alert("ไม่พบตัวเลือกสินค้า กรุณาเลือกขนาดอีกครั้ง");
+          }
           onAdd({
             productId: product.productId,
-            sku: selectedSku,
-            quantity: qty,
-          })
-        }
+            sku: selectedVariant.sku,
+            size: selectedVariant.size,
+            price: Number(selectedVariant.price),
+            quantity: Number(qty) || 1,
+            name: product.name,
+          });
+        }}
         className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white px-3 py-2 rounded-lg hover:bg-gray-900 disabled:bg-gray-300"
       >
         <ShoppingCart size={18} />

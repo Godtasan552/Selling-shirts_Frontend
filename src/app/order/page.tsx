@@ -38,7 +38,12 @@ export default function OrderPage() {
   }, []);
 
   const addToCart = (item: any) => {
-    setCart((p) => [...p, item]);
+    const coerced = {
+      ...item,
+      price: Number(item.price) || 0,
+      quantity: Number(item.quantity) || 1,
+    };
+    setCart((p) => [...p, coerced]);
   };
 
   // 2. เพิ่มฟังก์ชันลบสินค้าออกจากตะกร้า
@@ -46,11 +51,16 @@ export default function OrderPage() {
     setCart((prevCart) => prevCart.filter((_, index) => index !== indexToRemove));
   };
   const totalQuantity = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-  const subtotal = cart.reduce((sum, item) => sum + (item.price * (item.quantiy || 1)), 0)
+  const subtotal = cart.reduce((sum, item) => {
+    const price = Number(item.price) || 0;       // แปลงเป็นตัวเลข ถ้าไม่มีให้เป็น 0
+    const qty = Number(item.quantity) || 1;      // แปลงเป็นตัวเลข ถ้าไม่มีให้เป็น 1
+    return sum + (price * qty);
+  }, 0);
   const shippingCost = totalQuantity > 0
     ? 50 + ((totalQuantity - 1) * 10)
     : 0;
   const grandTotal = subtotal + shippingCost;
+
   const onSubmit = async () => {
     if (cart.length === 0) return alert("กรุณาเลือกสินค้าอย่างน้อย 1 ชิ้น");
 
@@ -112,7 +122,7 @@ return (
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-sm">
-                        {(c.price * c.quantity).toLocaleString()}.-
+                          {Number((c.price || 0) * (c.quantiy || 1)).toLocaleString()} บ.
                       </span>
                       <button 
                         onClick={() => removeFromCart(i)}
