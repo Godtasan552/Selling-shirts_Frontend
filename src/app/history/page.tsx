@@ -1,20 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { authGet } from "@/lib/authApi";
-import { authGetCookie } from "@/lib/authApi";
+import { useEffect, useState, useCallback } from "react";
+import { authGet, authGetCookie } from "@/lib/authApi";
 import OrderCard from "@/components/user/OrderCard";
 import { Filter } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+// Define the Order type
+interface Order {
+  _id: string;
+  // กำหนด properties ที่แน่นอนของ Order
+  status?: string;
+  total?: number;
+  [key: string]: unknown; // แทน any
+}
+
 export default function UserOrdersPage() {
   const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const [orders, setOrders] = useState([]);
-  const [status, setStatus] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [status, setStatus] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const fetchOrders = async (s?: string) => {
+  // useCallback ทำให้ fetchOrders stable reference
+  const fetchOrders = useCallback(async (s?: string) => {
     setLoading(true);
 
     const url = s
@@ -23,32 +33,38 @@ export default function UserOrdersPage() {
 
     const localToken = localStorage.getItem("auth_token");
 
-    // มี token = login ด้วยเบอร์มือถือ
-    let res;
+    let res: { status: number; orders?: Order[] };
     if (localToken) {
-      res = await authGet(url);
+      res = await authGet<{ orders: Order[] }>(url);
     } else {
-      // ไม่มี token = อาจเป็น Google Login → ใช้ cookie แทน
-      res = await authGetCookie(url);
+      res = await authGetCookie<{ orders: Order[] }>(url);
     }
 
     setLoading(false);
 
-    if (res.status === 200) {
+    if (res.status === 200 && res.orders) {
       setOrders(res.orders);
     } else if (res.status === 401) {
       router.push("/user_auth/login");
     }
+  }, [API_URL, router]);
+
+  // useEffect เรียก fetchOrders ครั้งแรก
+useEffect(() => {
+  // ใช้ IIFE async
+  (async () => {
+    await fetchOrders();
+  })();
+}, []); // ไม่ต้องใส่ fetchOrders เป็น dependency
+
+
+  const handleFilterClick = (filterKey: string) => {
+    setStatus(filterKey);
+    fetchOrders(filterKey);
   };
-
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
 
   return (
     <div className="max-w-3xl mx-auto mt-10 p-6 bg-white text-black dark:bg-gray-900 dark:text-white">
-
       <h1 className="text-2xl font-bold mb-4 flex items-center gap-2">
         <Filter /> ประวัติการสั่งซื้อ
       </h1>
@@ -65,16 +81,15 @@ export default function UserOrdersPage() {
         ].map((item) => (
           <button
             key={item.key}
-            onClick={() => {
-              setStatus(item.key);
-              fetchOrders(item.key);
-            }}
+            onClick={() => handleFilterClick(item.key)}
             className={`px-3 py-1 rounded-full border text-sm transition
-                        ${status === item.key
-                ? "bg-black text-white dark:bg-white dark:text-black"
-                : "bg-white text-black dark:bg-gray-700 dark:text-white"
+              ${
+                status === item.key
+                  ? "bg-black text-white dark:bg-white dark:text-black"
+                  : "bg-white text-black dark:bg-gray-700 dark:text-white"
               }
-              `} >
+            `}
+          >
             {item.label}
           </button>
         ))}
@@ -86,9 +101,7 @@ export default function UserOrdersPage() {
       {/* Order List */}
       <div className="grid gap-4 mt-4">
         {orders.length > 0 ? (
-          orders.map((order: any) => (
-            <OrderCard key={order._id} order={order} />
-          ))
+          orders.map((order) => <OrderCard key={order._id} order={order} />)
         ) : (
           <p className="text-gray-500 text-center">
             ไม่มีคำสั่งซื้อในสถานะนี้

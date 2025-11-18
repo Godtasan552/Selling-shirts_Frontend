@@ -2,7 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-
   images: {
     remotePatterns: [
       {
@@ -13,6 +12,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: '*.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'developers.google.com',
+        pathname: '/identity/images/**', // ระบุ path pattern
       },
     ],
   },

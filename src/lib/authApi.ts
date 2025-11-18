@@ -1,68 +1,83 @@
-export const post = async (url: string, body: any) => {
+
+// --------------------------
+// POST JSON API
+// --------------------------
+export const post = async <
+  TBody extends Record<string, unknown>,
+  TResponse extends Record<string, unknown> = Record<string, unknown>
+>(
+  url: string,
+  body: TBody
+): Promise<{ status: number; data: TResponse }> => {
   try {
     const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify(body),
     });
 
-    const data = await response.json();
-    return {
-      status: response.status,
-      data, // { message: "...", token: "..." }
-    };
-  } catch (error) {
+    const data = (await response.json()) as TResponse;
+    return { status: response.status, data };
+  } catch {
+    // ✅ cast ผ่าน unknown ก่อน แล้วค่อยเป็น TResponse
     return {
       status: 500,
-      data: { message: "Server Error" },
+      data: { message: "Server Error" } as unknown as TResponse,
     };
   }
 };
-export async function authGetCookie(url: string) {
+
+
+// --------------------------
+// GET API แบบใช้ cookie
+// --------------------------
+export async function authGetCookie<
+  TResponse extends Record<string, unknown> = Record<string, unknown>
+>(url: string): Promise<{ status: number } & TResponse> {
   const res = await fetch(url, {
     method: "GET",
-    credentials: "include", // ใช้ cookie เท่านั้น
+    credentials: "include",
     cache: "no-store",
   });
 
-  const data = await res.json();
+  const data = (await res.json()) as TResponse;
   return { status: res.status, ...data };
 }
- 
-export async function authGet(url: string) {
-  // 1) พยายามดึง token จาก cookie ก่อน
+
+// --------------------------
+// GET API แบบ Bearer Token + fallback cookie/localStorage
+// --------------------------
+export async function authGet<
+  TResponse extends Record<string, unknown> = Record<string, unknown>
+>(url: string): Promise<{ status: number } & TResponse> {
+  // หา token จาก cookie
   let token =
     document.cookie
       .split("; ")
       .find((c) => c.startsWith("auth_token="))
       ?.split("=")[1];
 
-  // 2) ถ้าไม่มีใน cookie → fallback ไป localStorage
+  // fallback localStorage
   if (!token) {
     try {
       token = localStorage.getItem("auth_token") || undefined;
-    } catch (e) {
-      // เผื่อมีหน้า server component เรียก → localStorage error
+    } catch {
       token = undefined;
     }
   }
 
-  // 3) สร้าง header ให้แบบ dynamic (ถ้าไม่มี token ก็ไม่ส่ง)
+  // headers dynamic
   const headers: Record<string, string> = {};
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch(url, {
     method: "GET",
     headers,
-    credentials: "include", // แนะนำให้ใส่ เพื่อรองรับ cookie-based auth
+    credentials: "include",
     cache: "no-store",
   });
 
-  const data = await res.json();
+  const data = (await res.json()) as TResponse;
   return { status: res.status, ...data };
 }
