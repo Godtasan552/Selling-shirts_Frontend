@@ -123,15 +123,15 @@ const HeroSection = ({ onShopClick }: { onShopClick: () => void }) => (
   </div>
 );
 
-// ==================== ProductCardSplit (Fixed) ====================
+// ==================== ProductCardSplit (Responsive) ====================
 const ProductCardSplit = ({ product }: { product: Product }) => {
   const sizeData = createSizeData(product.sizes);
   const imageUrl = getImageUrl(product.imageUrl);
 
   return (
-    <div className="flex bg-white shadow-md border border-gray-200 rounded-lg overflow-hidden mb-6 min-h-[450px]">
-      {/* ด้านซ้าย - รูปภาพ (40%) */}
-      <div className="w-2/5 relative bg-gray-50 flex items-center justify-center flex-shrink-0">
+    <div className="flex flex-col md:flex-row bg-white shadow-md border border-gray-200 rounded-lg overflow-hidden mb-6 md:min-h-[450px]">
+      {/* ด้านซ้าย - รูปภาพ (Mobile: full, Desktop: 40%) */}
+      <div className="w-full md:w-2/5 h-64 md:h-auto relative bg-gray-50 flex items-center justify-center flex-shrink-0">
         <Image
           src={imageUrl}
           alt={product.name}
@@ -142,30 +142,32 @@ const ProductCardSplit = ({ product }: { product: Product }) => {
         />
       </div>
 
-      {/* ด้านขวา - ข้อมูลสินค้า (60%) */}
-      <div className="w-3/5 p-6 sm:p-8 flex flex-col justify-between">
-        <div className="space-y-4">
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">{product.name}</h2>
-          <p className="text-sm sm:text-base text-gray-500">{product.description}</p>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-xs sm:text-sm font-medium text-gray-700 mb-3">ขนาดที่มี:</p>
-            <SizeCard productType="colored" sizes={sizeData} />
+      {/* ด้านขวา - ข้อมูลสินค้า (Mobile: full, Desktop: 60%) */}
+      <div className="w-full md:w-3/5 p-4 sm:p-6 md:p-8 flex flex-col justify-between">
+        <div className="space-y-3 sm:space-y-4">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">{product.name}</h2>
+          <p className="text-xs sm:text-sm md:text-base text-gray-500">{product.description}</p>
+          <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+            <p className="text-xs font-medium text-gray-700 mb-2 sm:mb-3">ขนาดที่มี:</p>
+            <div className="overflow-x-auto">
+              <SizeCard productType="colored" sizes={sizeData} />
+            </div>
           </div>
         </div>
 
-        <div className="space-y-4 mt-6">
+        <div className="space-y-3 sm:space-y-4 mt-4 sm:mt-6">
           <div>
             <p className="text-xs text-gray-500 mb-1">ราคา</p>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900">{product.price}</p>
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{product.price}</p>
           </div>
           <div className="flex gap-2 w-full">
             <Link
               href={`/order?product=${product.id}`}
-              className="flex-1 px-4 py-3 bg-gray-900 text-white rounded-lg text-center font-medium text-sm hover:opacity-80 transition"
+              className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gray-900 text-white rounded-lg text-center font-medium text-xs sm:text-sm hover:opacity-80 transition"
             >
               🛒 สั่งซื้อ
             </Link>
-            <button className="flex-1 px-4 py-3 border border-gray-900 text-gray-900 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+            <button className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-900 text-gray-900 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-50 transition">
               👁️ ดู
             </button>
           </div>
@@ -175,23 +177,24 @@ const ProductCardSplit = ({ product }: { product: Product }) => {
   );
 };
 
-// ==================== ProductCarousel (Fixed) ====================
+// ==================== ProductCarousel (Responsive) ====================
 const ProductCarousel = ({ products }: { products: Product[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const displayProducts = products.slice(0, 3);
   const total = displayProducts.length;
 
   useEffect(() => {
-    if (total === 0) return;
+    if (total === 0 || isHovering) return;
     intervalRef.current = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % total);
     }, CONFIG.CAROUSEL_INTERVAL);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [total]);
+  }, [total, isHovering]);
 
   if (!total) return <EmptyState />;
 
@@ -199,23 +202,28 @@ const ProductCarousel = ({ products }: { products: Product[] }) => {
   const handleNext = () => setCurrentIndex((prev) => (prev + 1) % total);
 
   return (
-    <div className="w-full p-6 rounded-xl mb-12 bg-white border border-gray-200 shadow-md">
-      <h2 className="text-3xl lg:text-4xl font-semibold text-center text-gray-900 mb-12">
+    <div className="w-full p-4 sm:p-6 lg:p-8 rounded-xl mb-12 bg-white border border-gray-200 shadow-md">
+      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-center text-gray-900 mb-8 sm:mb-12">
         ✨ สินค้าแนะนำประจำสัปดาห์
       </h2>
 
-      <div className="relative flex items-center justify-center">
+      <div
+        className="relative flex items-center justify-center"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
         {/* Prev Button */}
         <button
           onClick={handlePrev}
-          className="absolute left-0 z-10 bg-gray-900 text-white p-2 rounded-full hover:bg-gray-700 transition"
+          className="absolute left-0 sm:left-2 z-10 bg-gray-900 text-white p-1.5 sm:p-2 rounded-full hover:bg-gray-700 transition hidden sm:flex"
         >
           ◀
         </button>
 
         {/* Carousel Container */}
-        <div className="w-full px-12 overflow-hidden">
-          <div className="flex transition-transform duration-700 ease-in-out"
+        <div className="w-full px-0 sm:px-8 md:px-12 overflow-hidden">
+          <div
+            className="flex transition-transform duration-700 ease-in-out"
             style={{
               transform: `translateX(-${currentIndex * 100}%)`,
             }}
@@ -231,9 +239,25 @@ const ProductCarousel = ({ products }: { products: Product[] }) => {
         {/* Next Button */}
         <button
           onClick={handleNext}
-          className="absolute right-0 z-10 bg-gray-900 text-white p-2 rounded-full hover:bg-gray-700 transition"
+          className="absolute right-0 sm:right-2 z-10 bg-gray-900 text-white p-1.5 sm:p-2 rounded-full hover:bg-gray-700 transition hidden sm:flex"
         >
           ▶
+        </button>
+      </div>
+
+      {/* Mobile Navigation Buttons */}
+      <div className="flex sm:hidden gap-2 justify-center mt-4">
+        <button
+          onClick={handlePrev}
+          className="px-3 py-2 bg-gray-900 text-white rounded-lg text-sm hover:opacity-80 transition"
+        >
+          ◀ ก่อนหน้า
+        </button>
+        <button
+          onClick={handleNext}
+          className="px-3 py-2 bg-gray-900 text-white rounded-lg text-sm hover:opacity-80 transition"
+        >
+          ถัดไป ▶
         </button>
       </div>
 
@@ -247,6 +271,11 @@ const ProductCarousel = ({ products }: { products: Product[] }) => {
               }`}
           />
         ))}
+      </div>
+
+      {/* Mobile Indicator Text */}
+      <div className="sm:hidden text-center mt-3 text-xs text-gray-500">
+        {currentIndex + 1} / {total}
       </div>
     </div>
   );
