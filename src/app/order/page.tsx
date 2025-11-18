@@ -5,14 +5,41 @@ import OrderProductCard from "@/components/user/productCard";
 import { post } from "@/lib/authApi";
 import { Receipt, Send, Trash2 } from "lucide-react";
 
+// ==================== Types ====================
+interface Product {
+  productId: string;
+  name: string;
+  size: string;
+  price: number;
+  sku: string;
+  quantity?: number;
+  // ลบ any ออก
+}
+
+interface CartItem extends Product {
+  quantity: number;
+}
+
+interface OrderForm {
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  customerAddress: string;
+  note: string;
+}
+
+// errors object type
+type FormErrors = Partial<Record<keyof OrderForm, string>>;
+
+// ==================== Component ====================
 export default function OrderPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState<any[]>([]);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [products, setProducts] = useState<Product[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [errors, setErrors] = useState<FormErrors>({});
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<OrderForm>({
     customerName: "",
     customerPhone: "",
     customerEmail: "",
@@ -20,7 +47,7 @@ export default function OrderPage() {
     note: "",
   });
 
-  // โหลดสินค้า
+  // ==================== Load Products ====================
   useEffect(() => {
     const load = async () => {
       try {
@@ -36,35 +63,30 @@ export default function OrderPage() {
     };
 
     load();
-  }, []);
+  }, [API_URL]);
 
-  const addToCart = (item: any) => {
-    const coerced = {
+  // ==================== Cart Actions ====================
+  const addToCart = (item: Product) => {
+    const coerced: CartItem = {
       ...item,
       price: Number(item.price) || 0,
       quantity: Number(item.quantity) || 1,
     };
-    setCart((p) => [...p, coerced]);
+    setCart((prev) => [...prev, coerced]);
   };
 
   const removeFromCart = (indexToRemove: number) => {
-    setCart((prevCart) => prevCart.filter((_, index) => index !== indexToRemove));
+    setCart((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
-  const totalQuantity = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-  const subtotal = cart.reduce((sum, item) => {
-    const price = Number(item.price) || 0;
-    const qty = Number(item.quantity) || 1;
-    return sum + (price * qty);
-  }, 0);
-  const shippingCost = totalQuantity > 0
-    ? 50 + ((totalQuantity - 1) * 10)
-    : 0;
+  const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const shippingCost = totalQuantity > 0 ? 50 + (totalQuantity - 1) * 10 : 0;
   const grandTotal = subtotal + shippingCost;
 
-  // เช็คความถูกต้องของฟอร์ม
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  // ==================== Form Validation ====================
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
 
     if (!form.customerName.trim()) {
       newErrors.customerName = "กรุณากรอกชื่อ-นามสกุล";
@@ -90,8 +112,12 @@ export default function OrderPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // ==================== Submit Order ====================
   const onSubmit = async () => {
-    if (cart.length === 0) return alert("กรุณาเลือกสินค้าอย่างน้อย 1 ชิ้น");
+    if (cart.length === 0) {
+      alert("กรุณาเลือกสินค้าอย่างน้อย 1 ชิ้น");
+      return;
+    }
 
     if (!validateForm()) return;
 
@@ -99,7 +125,7 @@ export default function OrderPage() {
       ...form,
       items: cart,
       totalPrice: grandTotal,
-      shippingCost: shippingCost
+      shippingCost: shippingCost,
     });
 
     if (res.status === 201 || res.status === 200) {
@@ -111,27 +137,27 @@ export default function OrderPage() {
       }
 
       window.location.href = `/order/uploadslip?id=${orderId}&total=${grandTotal}&shipping=${shippingCost}&subtotal=${subtotal}`;
-
     } else {
       alert("เกิดข้อผิดพลาดในการสร้าง Order");
     }
   };
 
+  // ==================== Render ====================
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold flex items-center gap-2">
         <Receipt /> สั่งซื้อสินค้า
       </h1>
 
-      {/* รายการสินค้า */}
+      {/* Product List */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {products.map((p: any) => (
+        {products.map((p) => (
           <OrderProductCard key={p.productId} product={p} onAdd={addToCart} />
         ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* ตะกร้าสินค้า */}
+        {/* Cart */}
         <div className="p-4 border rounded-xl bg-white dark:bg-slate-900 shadow-md h-fit">
           <h2 className="font-bold text-xl mb-3 flex items-center gap-2 text-gray-900 dark:text-white">
             ตะกร้าสินค้า 
@@ -149,12 +175,12 @@ export default function OrderPage() {
                     <div>
                       <div className="font-medium text-sm text-gray-900 dark:text-white">{c.sku}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {c.size} | ราคา {c.price?.toLocaleString()} บ.
+                        {c.size} | ราคา {c.price.toLocaleString()} บ.
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-sm text-gray-900 dark:text-white">
-                        {Number((c.price || 0) * (c.quantity || 1)).toLocaleString()} บ.
+                        {(c.price * c.quantity).toLocaleString()} บ.
                       </span>
                       <button 
                         onClick={() => removeFromCart(i)}
@@ -167,7 +193,7 @@ export default function OrderPage() {
                 ))}
               </ul>
 
-              {/* ส่วนสรุปยอดเงิน */}
+              {/* Summary */}
               <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-2 text-sm border border-gray-100 dark:border-gray-700">
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>รวมค่าสินค้า</span>
@@ -186,16 +212,16 @@ export default function OrderPage() {
           )}
         </div>
 
-        {/* ฟอร์มข้อมูลลูกค้า */}
+        {/* Customer Form */}
         <div className="p-4 border rounded-xl bg-white dark:bg-slate-900 shadow-md h-fit">
           <h2 className="font-bold text-xl mb-3 text-gray-900 dark:text-white">ข้อมูลจัดส่ง</h2>
-          {[
+          {([
             { key: "customerName", label: "ชื่อ-นามสกุล", required: true },
             { key: "customerPhone", label: "เบอร์โทร", required: true },
             { key: "customerEmail", label: "อีเมล", required: true },
             { key: "customerAddress", label: "ที่อยู่จัดส่ง", required: true },
             { key: "note", label: "หมายเหตุ (ถ้ามี)", required: false },
-          ].map((f) => (
+          ] as const).map((f) => (
             <div key={f.key} className="mb-3">
               <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block flex items-center gap-1">
                 {f.label}
@@ -204,25 +230,25 @@ export default function OrderPage() {
               <input
                 placeholder={f.label}
                 className={`border p-2 w-full rounded text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 transition
-                  ${errors[f.key] 
+                  ${errors[f.key as keyof OrderForm] 
                     ? "border-red-500 focus:ring-red-500" 
                     : "border-gray-300 dark:border-gray-600 focus:ring-black dark:focus:ring-white"
                   }`}
-                value={(form as any)[f.key]}
+                value={form[f.key as keyof OrderForm]}
                 onChange={(e) => {
-                  setForm({ ...form, [f.key]: e.target.value });
-                  // ลบ error เมื่อเริ่มแก้ไข
-                  if (errors[f.key]) {
+                  const key = f.key as keyof OrderForm;
+                  setForm({ ...form, [key]: e.target.value });
+                  if (errors[key]) {
                     setErrors((prev) => {
                       const newErrors = { ...prev };
-                      delete newErrors[f.key];
+                      delete newErrors[key];
                       return newErrors;
                     });
                   }
                 }}
               />
-              {errors[f.key] && (
-                <p className="text-red-500 text-xs mt-1">{errors[f.key]}</p>
+              {errors[f.key as keyof OrderForm] && (
+                <p className="text-red-500 text-xs mt-1">{errors[f.key as keyof OrderForm]}</p>
               )}
             </div>
           ))}
