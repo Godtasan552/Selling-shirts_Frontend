@@ -11,7 +11,7 @@ export default function OrderProductCard({ product, onAdd }: any) {
     <div className="p-4 border rounded-xl bg-white shadow-md animate__animated animate__fadeInUp">
       <img
         src={product.imageUrl || "/no-image.png"}
-        className="w-full h-40 object-cover rounded-lg"
+        className="w-full h-48 object-cover object-center rounded-lg"
       />
 
       <h2 className="font-bold text-lg mt-2">{product.name}</h2>
@@ -29,7 +29,7 @@ export default function OrderProductCard({ product, onAdd }: any) {
                 : "bg-white text-gray-700"
             }`}
           >
-            {v.size} (เหลือ {v.stock})
+            {v.size}เหลือ{v.stock} {v.price} ฿
           </button>
         ))}
       </div>

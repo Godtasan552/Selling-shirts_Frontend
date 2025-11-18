@@ -123,7 +123,7 @@ return (
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-sm">
-                          {Number((c.price || 0) * (c.quantiy || 1)).toLocaleString()} บ.
+                          {Number((c.price || 0) * (c.quantity || 1)).toLocaleString()} บ.
                       </span>
                       <button 
                         onClick={() => removeFromCart(i)}
