@@ -90,7 +90,7 @@ const HeroSection = ({ onShopClick }: { onShopClick: () => void }) => (
     <div className="hero-content text-center flex-col lg:flex-row-reverse p-6 sm:p-10">
       <div className="relative w-full lg:w-1/2">
         <Image
-          src="/shirt_color.jpg"
+          src="/All.jpg"
           alt="Latest Collection"
           width={450}
           height={450}
@@ -129,38 +129,43 @@ const ProductCardSplit = ({ product }: { product: Product }) => {
   const imageUrl = getImageUrl(product.imageUrl);
 
   return (
-    <div className="flex bg-white shadow-md border border-gray-200 rounded-lg overflow-hidden mb-6 h-96">
-      {/* ด้านซ้าย - รูปภาพ (50%) */}
-      <div className="w-1/2 relative bg-gray-50 flex items-center justify-center">
+    <div className="flex bg-white shadow-md border border-gray-200 rounded-lg overflow-hidden mb-6 min-h-[450px]">
+      {/* ด้านซ้าย - รูปภาพ (40%) */}
+      <div className="w-2/5 relative bg-gray-50 flex items-center justify-center flex-shrink-0">
         <Image
           src={imageUrl}
           alt={product.name}
           width={300}
-          height={400}
+          height={450}
           className="h-full w-full object-contain"
           onError={(e) => { e.currentTarget.src = CONFIG.FALLBACK_IMAGE; }}
         />
       </div>
 
-      {/* ด้านขวา - ข้อมูลสินค้า (50%) */}
-      <div className="w-1/2 p-4 sm:p-6 flex flex-col justify-between gap-4 overflow-y-auto">
-        <div>
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{product.name}</h2>
-          <p className="text-sm sm:text-base text-gray-500 mb-4">{product.description}</p>
-          <div className="p-2 bg-gray-50 rounded-lg mb-4 overflow-x-auto">
+      {/* ด้านขวา - ข้อมูลสินค้า (60%) */}
+      <div className="w-3/5 p-6 sm:p-8 flex flex-col justify-between">
+        <div className="space-y-4">
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">{product.name}</h2>
+          <p className="text-sm sm:text-base text-gray-500">{product.description}</p>
+          <div className="bg-gray-50 rounded-lg p-4">
+            <p className="text-xs sm:text-sm font-medium text-gray-700 mb-3">ขนาดที่มี:</p>
             <SizeCard productType="colored" sizes={sizeData} />
           </div>
         </div>
-        <div className="flex flex-col gap-2">
-          <p className="text-xl sm:text-2xl font-semibold text-gray-900">{product.price}</p>
+
+        <div className="space-y-4 mt-6">
+          <div>
+            <p className="text-xs text-gray-500 mb-1">ราคา</p>
+            <p className="text-2xl sm:text-3xl font-bold text-gray-900">{product.price}</p>
+          </div>
           <div className="flex gap-2 w-full">
             <Link
               href={`/order?product=${product.id}`}
-              className="flex-1 px-3 py-2 bg-gray-900 text-white rounded-lg text-center font-medium text-sm hover:opacity-80 transition"
+              className="flex-1 px-4 py-3 bg-gray-900 text-white rounded-lg text-center font-medium text-sm hover:opacity-80 transition"
             >
               🛒 สั่งซื้อ
             </Link>
-            <button className="flex-1 px-3 py-2 border border-gray-900 text-gray-900 rounded-lg text-sm hover:bg-gray-50 transition">
+            <button className="flex-1 px-4 py-3 border border-gray-900 text-gray-900 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
               👁️ ดู
             </button>
           </div>
@@ -307,9 +312,6 @@ export default function HomePage() {
 
         <ProductSummaryCards />
 
-        <div className="w-full mt-12 mb-12 rounded-xl overflow-hidden shadow-md border border-gray-200">
-          <Image src="/All.jpg" alt="All Products" width={1920} height={1080} className="w-full h-auto object-cover" priority />
-        </div>
 
         <ContactCTA
           onLineClick={() => window.open('https://line.me/', '_blank')}
