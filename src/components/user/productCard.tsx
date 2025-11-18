@@ -14,7 +14,7 @@ export default function OrderProductCard({ product, onAdd }: any) {
   text-black dark:text-white">
       <img
         src={product.imageUrl || "/no-image.png"}
-        className="w-full h-48 object-cover object-center rounded-lg"
+        className="w-full aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden"
       />
 
       <h2 className="font-bold text-lg mt-2">{product.name}</h2>
