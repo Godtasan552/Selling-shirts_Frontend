@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import OrderProductCard from "@/components/user/productCard";
 import { post } from "@/lib/authApi";
-import { Receipt, Send } from "lucide-react";
+import { Receipt, Send, Trash2 } from "lucide-react"; // 1. เพิ่ม Trash2
 
 export default function OrderPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -22,11 +22,15 @@ export default function OrderPage() {
   // โหลดสินค้า
   useEffect(() => {
     const load = async () => {
-      const res = await fetch(`${API_URL}/api/public/home-stats`);
-      const data = await res.json();
+      try {
+        const res = await fetch(`${API_URL}/api/public/home-stats`);
+        const data = await res.json();
 
-      if (data.success) {
-        setProducts(data.stats.products);
+        if (data.success) {
+          setProducts(data.stats.products);
+        }
+      } catch (error) {
+        console.error("Error loading products:", error);
       }
     };
 
@@ -35,6 +39,11 @@ export default function OrderPage() {
 
   const addToCart = (item: any) => {
     setCart((p) => [...p, item]);
+  };
+
+  // 2. เพิ่มฟังก์ชันลบสินค้าออกจากตะกร้า
+  const removeFromCart = (indexToRemove: number) => {
+    setCart((prevCart) => prevCart.filter((_, index) => index !== indexToRemove));
   };
 
   const onSubmit = async () => {
@@ -47,24 +56,21 @@ export default function OrderPage() {
     console.log("RESPONSE CREATE ORDER =>", res);
 
     if (res.status === 201 || res.status === 200) {
-        const orderId = res.data?.order?._id;
+      const orderId = res.data?.order?._id;
 
-  if (!orderId) {
-    alert("ไม่พบ Order ID จาก API");
-    return;
-  }
+      if (!orderId) {
+        alert("ไม่พบ Order ID จาก API");
+        return;
+      }
 
-  window.location.href = `/order/uploadslip?id=${orderId}`;
-} else {
-  alert("เกิดข้อผิดพลาดในการสร้าง Order");
-}
-
-
+      window.location.href = `/order/uploadslip?id=${orderId}`;
+    } else {
+      alert("เกิดข้อผิดพลาดในการสร้าง Order");
+    }
   };
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
-
       <h1 className="text-2xl font-bold flex items-center gap-2">
         <Receipt /> สั่งซื้อสินค้า
       </h1>
@@ -84,12 +90,35 @@ export default function OrderPage() {
           <p className="text-gray-500">ยังไม่มีสินค้าในตะกร้า</p>
         ) : (
           <ul className="space-y-2 text-sm">
+            {/* 3. แก้ไขการแสดงผล Loop สินค้าในตะกร้า */}
             {cart.map((c, i) => (
-              <li key={i}>
-                - {c.sku} จำนวน {c.quantity}
+              <li 
+                key={i} 
+                className="flex justify-between items-center border-b pb-2 last:border-0"
+              >
+                <div className="flex gap-2">
+                  <span>- {c.sku}</span>
+                  <span className="text-gray-600">จำนวน {c.quantity}</span>
+                </div>
+                
+                {/* ปุ่มลบสินค้า */}
+                <button 
+                  onClick={() => removeFromCart(i)}
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition"
+                  title="ลบรายการนี้"
+                >
+                  <Trash2 size={16} />
+                </button>
               </li>
             ))}
           </ul>
+        )}
+        
+        {/* Optional: แสดงยอดรวมสินค้า */}
+        {cart.length > 0 && (
+             <div className="mt-3 pt-3 border-t font-bold text-right">
+                 รวมรายการ: {cart.length} รายการ
+             </div>
         )}
       </div>
 
@@ -109,9 +138,7 @@ export default function OrderPage() {
             placeholder={f.label}
             className="border p-2 w-full rounded mb-2"
             value={(form as any)[f.key]}
-            onChange={(e) =>
-              setForm({ ...form, [f.key]: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
           />
         ))}
 
