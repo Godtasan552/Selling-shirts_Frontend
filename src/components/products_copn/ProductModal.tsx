@@ -225,7 +225,7 @@ export function ProductModal({
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Enter product name"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-gray-900"
               />
             </div>
 
@@ -238,7 +238,7 @@ export function ProductModal({
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Enter product description"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-gray-900"
                 rows={3}
               />
             </div>
@@ -271,7 +271,7 @@ export function ProductModal({
                   type="file"
                   accept="image/*"
                   onChange={handleImageFileChange}
-                  className="w-full px-4 py-2 border border-gray-300 bg-white rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer cursor-pointer transition-all"
+                  className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer cursor-pointer transition-all"
                 />
                 <p className="text-sm text-gray-500 mt-2 flex items-center gap-2">
                   <Upload size={14} />
@@ -318,7 +318,7 @@ export function ProductModal({
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-gray-900"
                 >
                   {CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
@@ -335,7 +335,7 @@ export function ProductModal({
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white text-gray-900"
                 >
                   {Object.entries(PRODUCT_STATUS).map(([key, val]) => (
                     <option key={key} value={key}>
@@ -443,57 +443,82 @@ function VariantRow({ variant, index, onVariantChange, onRemove, canRemove }: Va
   const SIZES = ['S', 'SS', 'SSS', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
   
   return (
-    <div className="grid grid-cols-6 gap-2 items-end p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all">
-      <select
-        value={variant.size}
-        onChange={(e) => onVariantChange(index, 'size', e.target.value)}
-        className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      >
-        {SIZES.map((s) => (
-          <option key={s} value={s}>{s}</option>
-        ))}
-      </select>
-      
-      <input
-        type="text"
-        placeholder="Color"
-        value={variant.color}
-        onChange={(e) => onVariantChange(index, 'color', e.target.value)}
-        className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      />
-      
-      <input
-        type="text"
-        placeholder="SKU"
-        value={variant.sku}
-        onChange={(e) => onVariantChange(index, 'sku', e.target.value)}
-        className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      />
-      
-      <input
-        type="number"
-        placeholder="Price"
-        value={variant.price}
-        onChange={(e) => onVariantChange(index, 'price', e.target.value)}
-        className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      />
-      
-      <input
-        type="number"
-        placeholder="Qty"
-        value={variant.quantity}
-        onChange={(e) => onVariantChange(index, 'quantity', e.target.value)}
-        className="px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      />
-      
-      <button
-        type="button"
-        onClick={() => onRemove(index)}
-        disabled={!canRemove}
-        className="p-1.5 rounded-full text-red-600 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-      >
-        <Trash2 size={16} />
-      </button>
+    <div className="p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all">
+      <div className="grid grid-cols-6 gap-2">
+        {/* Size */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">Size</label>
+          <select
+            value={variant.size}
+            onChange={(e) => onVariantChange(index, 'size', e.target.value)}
+            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+          >
+            {SIZES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+        
+        {/* Color */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">Color</label>
+          <input
+            type="text"
+            placeholder="Color"
+            value={variant.color}
+            onChange={(e) => onVariantChange(index, 'color', e.target.value)}
+            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+          />
+        </div>
+        
+        {/* SKU */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">SKU</label>
+          <input
+            type="text"
+            placeholder="SKU"
+            value={variant.sku}
+            onChange={(e) => onVariantChange(index, 'sku', e.target.value)}
+            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+          />
+        </div>
+        
+        {/* Price */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">Price</label>
+          <input
+            type="number"
+            placeholder="Price"
+            value={variant.price}
+            onChange={(e) => onVariantChange(index, 'price', e.target.value)}
+            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+          />
+        </div>
+        
+        {/* Quantity */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">Quantity</label>
+          <input
+            type="number"
+            placeholder="Qty"
+            value={variant.quantity}
+            onChange={(e) => onVariantChange(index, 'quantity', e.target.value)}
+            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+          />
+        </div>
+        
+        {/* Delete Button */}
+        <div className="flex items-end">
+          <button
+            type="button"
+            onClick={() => onRemove(index)}
+            disabled={!canRemove}
+            className="w-full p-1.5 rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            <Trash2 size={16} className="mx-auto" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

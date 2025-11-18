@@ -1,6 +1,7 @@
 // ============================================
-// 3. types/admin.ts - NEW
+// types/product_admin.ts - FIXED & CLEANED
 // ============================================
+
 export interface Variant {
   size: string;
   color: string;
@@ -9,16 +10,27 @@ export interface Variant {
   quantity: number;
 }
 
+// Product from database (includes _id and imageUrl)
 export interface Product {
   _id: string;
   name: string;
   description: string;
   category: string;
-  imageUrl?: string;
+  status: string;
+  variants: Variant[];
+  imageUrl?: string; // URL ของรูปที่อยู่ใน database
+}
+
+// Form data type (ไม่มี imageUrl เพราะส่งเป็น File แยก)
+export interface FormDataType {
+  name: string;
+  description: string;
+  category: string;
   status: string;
   variants: Variant[];
 }
 
+// Order types
 export interface OrderItem {
   name: string;
   size: string;
@@ -39,15 +51,7 @@ export interface Order {
   paymentSlip?: string;
 }
 
-export interface FormDataType {
-  name: string;
-  description: string;
-  category: string;
-  imageUrl: string;
-  status: string;
-  variants: Variant[];
-}
-
+// Constants
 export const PRODUCT_STATUS = {
   active: { label: 'Active', color: 'bg-green-100 text-green-800' },
   inactive: { label: 'Inactive', color: 'bg-gray-100 text-gray-800' },
@@ -63,5 +67,4 @@ export const ORDER_STATUS = {
 } as const;
 
 export const CATEGORIES = ['t-shirt', 'polo', 'hoodie', 'jacket', 'other'] as const;
-export const SIZES = ['S', 'SS', 'M', 'L', 'XL', '2XL', '3XL'] as const;
-
+export const SIZES = ['S', 'SS', 'SSS', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'] as const;

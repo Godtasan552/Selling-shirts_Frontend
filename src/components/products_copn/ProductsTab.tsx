@@ -1,7 +1,7 @@
 // ============================================
 // components/admin/ProductsTab.tsx - FIXED
 // ============================================
-import { Plus, Edit, Trash2, Check, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, AlertCircle } from 'lucide-react';
 import type { Product, FormDataType } from '@/types/product_admin';
 import { PRODUCT_STATUS } from '@/types/product_admin';
 import { ProductModal } from './ProductModal';
@@ -11,8 +11,9 @@ interface ProductsTabProps {
   products: Product[];
   loading: boolean;
   error: string;
-  onCreateProduct: (data: FormDataType) => Promise<boolean>;
-  onUpdateProduct: (productId: string, data: FormDataType) => Promise<boolean>;
+  // ✅ Updated signatures to include imageFile parameter
+  onCreateProduct: (data: FormDataType, imageFile: File | null) => Promise<boolean>;
+  onUpdateProduct: (productId: string, data: FormDataType, imageFile: File | null) => Promise<boolean>;
   onDeleteProduct: (productId: string) => Promise<boolean>;
   onUpdateProductStatus?: (productId: string, status: string) => Promise<boolean>;
 }
@@ -33,13 +34,14 @@ export function ProductsTab({
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
   const [statusError, setStatusError] = useState('');
 
-  const handleSaveProduct = async (formData: FormDataType) => {
+  // ✅ Updated to handle imageFile
+  const handleSaveProduct = async (formData: FormDataType, imageFile: File | null) => {
     setIsModalLoading(true);
     setModalError('');
 
     const success = editingProduct
-      ? await onUpdateProduct(editingProduct._id, formData)
-      : await onCreateProduct(formData);
+      ? await onUpdateProduct(editingProduct._id, formData, imageFile)
+      : await onCreateProduct(formData, imageFile);
 
     if (success) {
       setShowModal(false);
@@ -118,6 +120,7 @@ export function ProductsTab({
           <table className="w-full">
             <thead className="bg-gray-100 border-b">
               <tr>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Image</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Name</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Category</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Variants</th>
@@ -128,11 +131,26 @@ export function ProductsTab({
             <tbody className="divide-y">
               {products.map((product) => (
                 <tr key={product._id} className="hover:bg-gray-50">
+                  {/* Image Column */}
+                  <td className="px-6 py-4">
+                    {product.imageUrl ? (
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name}
+                        className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <span className="text-gray-400 text-xs">No image</span>
+                      </div>
+                    )}
+                  </td>
+                  
                   <td className="px-6 py-4 text-sm text-gray-900">{product.name}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{product.category}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{product.variants?.length || 0}</td>
                   
-                  {/* ✨ Status with dropdown */}
+                  {/* Status with dropdown */}
                   <td className="px-6 py-4 text-sm">
                     <select
                       value={product.status}
