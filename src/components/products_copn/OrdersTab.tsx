@@ -37,7 +37,7 @@ export function OrdersTab({
 
   const handleSelectStatus = (status: string) => {
     setFilterStatus(status);
-    setDropdownOpen(false); // ปิด dropdown หลังเลือก
+    setDropdownOpen(false);
   };
 
   return (
@@ -136,6 +136,7 @@ function OrderCard({
   const [isConfirming, setIsConfirming] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [showSlipModal, setShowSlipModal] = useState(false);
 
   const statusConfig = ORDER_STATUS[order.status as keyof typeof ORDER_STATUS];
 
@@ -159,151 +160,173 @@ function OrderCard({
   };
 
   return (
-    <div
-      className={clsx(
-        'rounded-lg shadow border transition-all duration-300 overflow-hidden',
-        isSelected ? 'bg-blue-50 border-blue-400' : 'bg-white border-gray-200',
-        'hover:scale-[1.01] hover:shadow-lg'
-      )}
-    >
-      {/* Header */}
-      <div
-        onClick={onToggle}
-        className={clsx(
-          'p-4 cursor-pointer flex flex-col sm:flex-row justify-between items-start sm:items-center transition-colors duration-300',
-          isSelected ? 'bg-blue-100 hover:bg-blue-200' : 'hover:bg-gray-50'
-        )}
-      >
-        <div className="flex-1 mb-2 sm:mb-0">
-          <h3 className="font-semibold text-gray-900">{order.customerName}</h3>
-          <p className="text-sm text-gray-600">Order ID: {order._id.slice(-8)}</p>
-          <p className="text-sm text-gray-600">{order.customerPhone}</p>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="font-semibold text-gray-900">
-              ฿{order.totalPrice?.toFixed(2) || '0.00'}
-            </p>
-            <span
-              className={clsx(
-                'px-3 py-1 rounded-full text-xs font-medium inline-block',
-                statusConfig?.color || 'bg-gray-100 text-gray-800'
-              )}
-            >
-              {statusConfig?.label || order.status}
-            </span>
-          </div>
-
-          <ChevronDown
-            size={20}
-            className={clsx('transition-transform duration-300', isExpanded ? 'rotate-180' : '')}
-          />
-        </div>
-      </div>
-
-      {/* Expanded Section with animation */}
+    <>
       <div
         className={clsx(
-          'transition-all duration-500 overflow-hidden',
-          isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+          'rounded-lg shadow border transition-all duration-300 overflow-hidden',
+          isSelected ? 'bg-blue-50 border-blue-400' : 'bg-white border-gray-200',
+          'hover:scale-[1.01] hover:shadow-lg'
         )}
       >
-        <div className="border-t p-4 bg-gray-50 space-y-4">
-          {/* Items */}
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-2">Items</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 overflow-x-auto">
-              {order.items?.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="text-sm text-gray-600 p-2 bg-white rounded-lg shadow-sm"
-                >
-                  {item.name} - Size: {item.size} (x{item.quantity}) - ฿
-                  {(item.price * item.quantity).toFixed(2)}
-                  <p className="text-sm text-gray-600">
-                    Shipping: ฿{order.shippingCost?.toFixed(2) || '0.00'}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Customer Info */}
-          <div className="border-t pt-4">
-            <div className="space-y-2 bg-white p-3 rounded-lg shadow-sm border overflow-x-auto">
-              <p className="text-sm text-gray-800">
-                <strong>Address:</strong> {order.customerAddress}
-              </p>
-              <p className="text-sm text-gray-800">
-                <strong>Email:</strong> {order.customerEmail}
-              </p>
-            </div>
-          </div>
-
-          {/* Payment Slip */}
-          {order.paymentSlip && (
-            <div className="border-t pt-4">
-              <p className="font-semibold text-gray-900 mb-3">📸 Payment Slip</p>
-              <PaymentSlipImage src={order.paymentSlip} />
-
-              {!isConfirmed && order.status === 'verifying_payment' ? (
-                <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                  <button
-                    onClick={handleConfirm}
-                    disabled={isConfirming}
-                    className="flex-1 btn btn-success gap-2"
-                  >
-                    <Check size={18} /> {isConfirming ? 'Confirming...' : 'Confirm'}
-                  </button>
-
-                  <button
-                    onClick={handleReject}
-                    disabled={isRejecting}
-                    className="flex-1 btn btn-error gap-2"
-                  >
-                    <X size={18} /> Reject
-                  </button>
-                </div>
-              ) : (
-                <p className="text-green-600 font-semibold flex items-center gap-2 mt-2">
-                  <Check size={18} /> ตรวจสอบแล้ว
-                </p>
-              )}
-            </div>
+        {/* Header */}
+        <div
+          onClick={onToggle}
+          className={clsx(
+            'p-4 cursor-pointer flex flex-col sm:flex-row justify-between items-start sm:items-center transition-colors duration-300',
+            isSelected ? 'bg-blue-100 hover:bg-blue-200' : 'hover:bg-gray-50'
           )}
+        >
+          <div className="flex-1 mb-2 sm:mb-0">
+            <h3 className="font-semibold text-gray-900">{order.customerName}</h3>
+            <p className="text-sm text-gray-600">Order ID: {order._id.slice(-8)}</p>
+            <p className="text-sm text-gray-600">{order.customerPhone}</p>
+          </div>
 
-          {/* Status Update */}
-          {['paid', 'shipping', 'completed'].includes(order.status) && (
-            <div className="border-t pt-4">
-              <div className="bg-white p-3 rounded-lg border border-gray-300 shadow-sm">
-                <label className="block text-sm font-medium text-gray-800 mb-2">
-                  Update Status
-                </label>
-                <select
-                  value={order.status}
-                  onChange={(e) => onUpdateStatus(e.target.value)}
-                  className="select select-bordered w-full bg-gray-100 text-gray-700 border-gray-300 focus:border-blue-400 focus:ring focus:ring-blue-200"
-                >
-                  <option value="paid">Paid</option>
-                  <option value="shipping">Shipping</option>
-                  <option value="completed">Completed</option>
-                </select>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="font-semibold text-gray-900">
+                ฿{order.totalPrice?.toFixed(2) || '0.00'}
+              </p>
+              <span
+                className={clsx(
+                  'px-3 py-1 rounded-full text-xs font-medium inline-block',
+                  statusConfig?.color || 'bg-gray-100 text-gray-800'
+                )}
+              >
+                {statusConfig?.label || order.status}
+              </span>
+            </div>
+
+            <ChevronDown
+              size={20}
+              className={clsx('transition-transform duration-300', isExpanded ? 'rotate-180' : '')}
+            />
+          </div>
+        </div>
+
+        {/* Expanded Section with animation */}
+        <div
+          className={clsx(
+            'transition-all duration-500 overflow-hidden',
+            isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+          )}
+        >
+          <div className="border-t p-4 bg-gray-50 space-y-4">
+            {/* Items */}
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-2">Items</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 overflow-x-auto">
+                {order.items?.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="text-sm text-gray-600 p-2 bg-white rounded-lg shadow-sm"
+                  >
+                    {item.name} - Size: {item.size} (x{item.quantity}) - ฿
+                    {(item.price * item.quantity).toFixed(2)}
+                    <p className="text-sm text-gray-600">
+                      Shipping: ฿{order.shippingCost?.toFixed(2) || '0.00'}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
-          )}
+
+            {/* Customer Info */}
+            <div className="border-t pt-4">
+              <div className="space-y-2 bg-white p-3 rounded-lg shadow-sm border overflow-x-auto">
+                <p className="text-sm text-gray-800">
+                  <strong>Address:</strong> {order.customerAddress}
+                </p>
+                <p className="text-sm text-gray-800">
+                  <strong>Email:</strong> {order.customerEmail}
+                </p>
+              </div>
+            </div>
+
+            {/* Payment Slip */}
+            {order.paymentSlip && (
+              <div className="border-t pt-4">
+                <p className="font-semibold text-gray-900 mb-3">📸 Payment Slip</p>
+                <PaymentSlipImage 
+                  src={order.paymentSlip} 
+                  onClickImage={() => setShowSlipModal(true)}
+                />
+
+                {!isConfirmed && order.status === 'verifying_payment' ? (
+                  <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                    <button
+                      onClick={handleConfirm}
+                      disabled={isConfirming}
+                      className="flex-1 btn btn-success gap-2"
+                    >
+                      <Check size={18} /> {isConfirming ? 'Confirming...' : 'Confirm'}
+                    </button>
+
+                    <button
+                      onClick={handleReject}
+                      disabled={isRejecting}
+                      className="flex-1 btn btn-error gap-2"
+                    >
+                      <X size={18} /> Reject
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-green-600 font-semibold flex items-center gap-2 mt-2">
+                    <Check size={18} /> ตรวจสอบแล้ว
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Status Update */}
+            {['paid', 'shipping', 'completed'].includes(order.status) && (
+              <div className="border-t pt-4">
+                <div className="bg-white p-3 rounded-lg border border-gray-300 shadow-sm">
+                  <label className="block text-sm font-medium text-gray-800 mb-2">
+                    Update Status
+                  </label>
+                  <select
+                    value={order.status}
+                    onChange={(e) => onUpdateStatus(e.target.value)}
+                    className="select select-bordered w-full bg-gray-100 text-gray-700 border-gray-300 focus:border-blue-400 focus:ring focus:ring-blue-200"
+                  >
+                    <option value="paid">Paid</option>
+                    <option value="shipping">Shipping</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Payment Slip Modal */}
+      {showSlipModal && order.paymentSlip && (
+        <PaymentSlipModal 
+          src={order.paymentSlip} 
+          onClose={() => setShowSlipModal(false)} 
+        />
+      )}
+    </>
   );
 }
 
 // --- Payment Slip Image ---
-function PaymentSlipImage({ src }: { src: string }) {
+function PaymentSlipImage({ 
+  src, 
+  onClickImage 
+}: { 
+  src: string;
+  onClickImage: () => void;
+}) {
   const [imgError, setImgError] = useState(false);
 
   return (
-    <div className="relative w-full max-w-[400px] h-72 mb-4 bg-gray-100 rounded-lg border border-gray-300 overflow-hidden shadow">
+    <div 
+      onClick={onClickImage}
+      className="relative w-full max-w-[400px] h-72 mb-4 bg-gray-100 rounded-lg border border-gray-300 overflow-hidden shadow cursor-pointer hover:opacity-80 transition-opacity"
+    >
       {!imgError ? (
         <Image
           src={src}
@@ -320,6 +343,54 @@ function PaymentSlipImage({ src }: { src: string }) {
           <span className="mt-2 text-sm">ไม่พบรูป</span>
         </div>
       )}
+    </div>
+  );
+}
+
+// --- Payment Slip Modal ---
+function PaymentSlipModal({ src, onClose }: { src: string; onClose: () => void }) {
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 bg-gray-200 hover:bg-gray-300 rounded-full transition-colors z-10"
+        >
+          <X size={24} className="text-gray-800" />
+        </button>
+
+        {/* Image Container */}
+        <div className="flex items-center justify-center p-8 bg-gray-50 min-h-[500px]">
+          {!imgError ? (
+            <div className="relative w-full h-auto">
+              <Image
+                src={src}
+                alt="Payment Slip Full View"
+                width={800}
+                height={600}
+                className="w-full h-auto object-contain"
+                priority
+                unoptimized
+                onError={() => setImgError(true)}
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-gray-500">
+              <X size={64} />
+              <span className="mt-4 text-lg">ไม่พบรูป</span>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
