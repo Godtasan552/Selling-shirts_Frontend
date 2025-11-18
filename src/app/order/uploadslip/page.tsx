@@ -22,7 +22,7 @@ export default function UploadSlipPage() {
 
     if (res.status === 200) {
       alert("อัปโหลดสลิปสำเร็จ!");
-      window.location.href = "/user/orders";
+      window.location.href = "/history";
     } else {
       alert("อัปโหลดไม่สำเร็จ");
     }
