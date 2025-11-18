@@ -124,18 +124,26 @@ export default function UserOrdersPage() {
       <div className="w-full max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8 lg:mb-10 fade-in-0">
-          <div className="flex items-center gap-3 sm:gap-4 mb-3">
-            <div className="p-3 sm:p-4 rounded-2xl bg-gradient-to-br from-indigo-100 to-blue-100 shadow-lg flex-shrink-0 backdrop-blur-sm">
-              <Package className="w-6 h-6 sm:w-7 sm:h-7 text-indigo-600" />
+          <div className="flex items-center justify-between gap-3 sm:gap-4 mb-3">
+            <div className="flex items-center gap-3 sm:gap-4 flex-1">
+              <div className="p-3 sm:p-4 rounded-2xl bg-gradient-to-br from-indigo-100 to-blue-100 shadow-lg flex-shrink-0 backdrop-blur-sm">
+                <Package className="w-6 h-6 sm:w-7 sm:h-7 text-indigo-600" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                  ประวัติการสั่งซื้อ
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                  จัดการและติดตามคำสั่งซื้อของคุณ
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
-                ประวัติการสั่งซื้อ
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                จัดการและติดตามคำสั่งซื้อของคุณ
-              </p>
-            </div>
+            <button
+              onClick={() => router.push("/")}
+              className="px-4 sm:px-6 py-2.5 sm:py-3 bg-red-400 from-gray-100 to-gray-50 border-2 border-gray-200 text-gray-700 rounded-xl sm:rounded-2xl font-semibold hover:from-gray-200 hover:to-gray-100 hover:border-indigo-300 transition-all duration-300 hover:shadow-lg hover:scale-105 text-xs sm:text-sm flex-shrink-0 whitespace-nowrap"
+            >
+              ← กลับหน้าแรก
+            </button>
           </div>
         </div>
 
