@@ -1,17 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import "animate.css"; // <-- import จาก node_modules
-
-
+import "animate.css";
 
 export const metadata: Metadata = {
   title: "Selling Shirts",
   description: "An application for selling shirts.",
   manifest: "/manifest.json",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -26,6 +20,11 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,7 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme="light">
-      <body >
+      <body>
         {children}
       </body>
     </html>
