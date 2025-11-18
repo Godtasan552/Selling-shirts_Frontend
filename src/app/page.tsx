@@ -187,6 +187,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 ))}
+
               </div>
 
             </div>
@@ -201,6 +202,19 @@ export default function HomePage() {
         </div>
 
         <ProductSummaryCards />
+
+        {/* Full-width Image Only Card */}
+        <div className="w-full mt-12 mb-12 rounded-xl overflow-hidden shadow-xl">
+          <Image
+            src="/All.jpg"
+            alt="All Products"
+            layout="responsive"
+            width={1920}
+            height={1080}
+            objectFit="cover"
+            className="rounded-xl"
+          />
+        </div>
       </main>
 
       <Footer />
