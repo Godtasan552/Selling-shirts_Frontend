@@ -7,13 +7,22 @@ import Button from "@/components/auth_user/Button";
 import ErrorText from "@/components/auth_user/ErrorText";
 import { post } from "@/lib/authApi";
 import { LogIn } from "lucide-react";
+import Image from "next/image";
+
+interface LoginResponse {
+  message?: string;
+  token?: string;
+  [key: string]: unknown; // <-- เพิ่มบรรทัดนี้
+}
+
 
 export default function LoginPage() {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const GOOGLE_URL = `${API_URL}/auth/google/redirect`;
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+
+  const [phone, setPhone] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   const handleLogin = async () => {
     if (!phoneRegex.test(phone)) {
@@ -21,20 +30,21 @@ export default function LoginPage() {
       return;
     }
 
-    const res = await post(`${API_URL}/auth/login`, {
-      phone,
-      password,
-    });
-    console.log(res);
+    const res = await post<{ phone: string; password: string }, LoginResponse>(
+      `${API_URL}/auth/login`,
+      { phone, password }
+    );
+
     if (res.status === 200) {
-      if (res.data?.token){
-        localStorage.setItem("auth_token", res.data.tokn);
+      if (res.data?.token) {
+        localStorage.setItem("auth_token", res.data.token);
       }
       window.location.href = "/history";
     } else {
-      setError(res.data?.message || "เบอร์หรือรหัสผ่านผิด");
+      setError(String(res.data?.message) || "เบอร์หรือรหัสผ่านผิด");
     }
   };
+
   const handleGoogleLogin = () => {
     window.location.href = GOOGLE_URL;
   };
@@ -49,20 +59,21 @@ export default function LoginPage() {
         label="Phone Number"
         type="text"
         value={phone}
-        onChange={(e: any) => setPhone(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
       />
 
       <Input
         label="Password"
         type="password"
         value={password}
-        onChange={(e: any) => setPassword(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
       />
 
       {error && <ErrorText message={error} />}
 
       <Button onClick={handleLogin}>Login</Button>
-            {/* Divider */}
+
+      {/* Divider */}
       <div className="flex items-center my-4">
         <div className="flex-1 h-[1px] bg-gray-300"></div>
         <span className="px-2 text-gray-500 text-sm">หรือ</span>
@@ -73,10 +84,11 @@ export default function LoginPage() {
         onClick={handleGoogleLogin}
         className="w-full flex items-center justify-center gap-2 border p-2 rounded-md hover:bg-gray-100 transition"
       >
-        <img
+        <Image
           src="https://developers.google.com/identity/images/g-logo.png"
           alt="google"
-          className="w-5 h-5"
+          width={20}
+          height={20}
         />
         <span className="text-gray-700 font-medium">Login with Google</span>
       </button>

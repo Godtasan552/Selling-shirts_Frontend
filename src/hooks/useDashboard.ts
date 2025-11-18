@@ -207,7 +207,7 @@ export function useDashboard(): UseDashboardReturn {
       setLoading(true);
       setError('');
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'NEXT_PUBLIC_API_URL';
       const token = getToken();
 
       if (!token) throw new Error('No authentication token found');

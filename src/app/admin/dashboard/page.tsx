@@ -1,13 +1,13 @@
 'use client';
 
 import { useDashboard } from '@/hooks/useDashboard';
-import { StatCard } from '@/components/dashboards/shared/StatCard';
-import { ProductTable } from '@/components/dashboards/ProductTable';
-import { ProductSummary } from '@/components/dashboards/ProductSummary';
-import { OrderTable } from '@/components/dashboards/OrderTable';
+import { StatCard } from '@/components/dashboards_copn/shared/StatCard';
+import { ProductTable } from '@/components/dashboards_copn/ProductTable';
+import { ProductSummary } from '@/components/dashboards_copn/ProductSummary';
+import { OrderTable } from '@/components/dashboards_copn/OrderTable';
 
-import { LoadingState } from '@/components/dashboards/shared/LoadingState';
-import { ErrorState } from '@/components/dashboards/shared/ErrorState';
+import { LoadingState } from '@/components/dashboards_copn/shared/LoadingState';
+import { ErrorState } from '@/components/dashboards_copn/shared/ErrorState';
 
 export default function DashboardPage() {
   const { stats, products, orders, loading, error } = useDashboard();
