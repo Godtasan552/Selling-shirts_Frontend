@@ -101,14 +101,15 @@ return (
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
+            <div className="p-4 border rounded-xl bg-white dark:bg-slate-900 shadow-md h-fit">
+      <h2 className="font-bold text-xl mb-3 flex items-center gap-2 text-gray-900 dark:text-white">
+        ตะกร้าสินค้า 
+        <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+          ({totalQuantity} ชิ้น)
+        </span>
+      </h2>
         {/* ตะกร้าสินค้า & สรุปยอดเงิน */}
-        <div className="p-4 border rounded-xl bg-white shadow-md h-fit">
-          <h2 className="font-bold text-xl mb-3 flex items-center gap-2">
-             ตะกร้าสินค้า <span className="text-sm font-normal text-gray-500">({totalQuantity} ชิ้น)</span>
-          </h2>
-
-          {cart.length === 0 ? (
+                 {cart.length === 0 ? (
             <p className="text-gray-500 text-center py-4">ยังไม่มีสินค้าในตะกร้า</p>
           ) : (
             <>
@@ -156,27 +157,27 @@ return (
         </div>
 
         {/* ฟอร์มข้อมูลลูกค้า */}
-        <div className="p-4 border rounded-xl bg-white shadow-md h-fit">
-          <h2 className="font-bold text-xl mb-3">ข้อมูลจัดส่ง</h2>
-
-          {[
-            { key: "customerName", label: "ชื่อ-นามสกุล" },
-            { key: "customerPhone", label: "เบอร์โทร" },
-            { key: "customerEmail", label: "อีเมล" },
-            { key: "customerAddress", label: "ที่อยู่จัดส่ง" },
-            { key: "note", label: "หมายเหตุ (ถ้ามี)" },
-          ].map((f) => (
-            <div key={f.key} className="mb-3">
-                <label className="text-xs font-medium text-gray-700 mb-1 block">{f.label}</label>
-                <input
-                    placeholder={f.label}
-                    className="border p-2 w-full rounded text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                    value={(form as any)[f.key]}
-                    onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                />
-            </div>
-          ))}
-
+            <div className="p-4 border rounded-xl bg-white dark:bg-slate-900 shadow-md h-fit">
+      <h2 className="font-bold text-xl mb-3 text-gray-900 dark:text-white">ข้อมูลจัดส่ง</h2>
+      {[
+        { key: "customerName", label: "ชื่อ-นามสกุล" },
+        { key: "customerPhone", label: "เบอร์โทร" },
+        { key: "customerEmail", label: "อีเมล" },
+        { key: "customerAddress", label: "ที่อยู่จัดส่ง" },
+        { key: "note", label: "หมายเหตุ (ถ้ามี)" },
+      ].map((f) => (
+        <div key={f.key} className="mb-3">
+          <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+            {f.label}
+          </label>
+          <input
+            placeholder={f.label}
+            className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+            value={(form as any)[f.key]}
+            onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+          />
+        </div>
+      ))}
           <button
             onClick={onSubmit}
             disabled={cart.length === 0}

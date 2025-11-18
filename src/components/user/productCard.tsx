@@ -8,14 +8,17 @@ export default function OrderProductCard({ product, onAdd }: any) {
   const [qty, setQty] = useState(1);
 
   return (
-    <div className="p-4 border rounded-xl bg-white shadow-md animate__animated animate__fadeInUp">
+    <div className="p-4 border rounded-xl 
+  bg-white dark:bg-gray-800 
+  shadow-md animate__animated animate__fadeInUp
+  text-black dark:text-white">
       <img
         src={product.imageUrl || "/no-image.png"}
         className="w-full h-48 object-cover object-center rounded-lg"
       />
 
       <h2 className="font-bold text-lg mt-2">{product.name}</h2>
-      <p className="text-gray-600 text-sm">ขายแล้ว: {product.totalSold}</p>
+      <p className="text-gray-600 dark:text-gray-300 text-sm">ขายแล้ว: {product.totalSold}</p>
 
       {/* Sizes */}
       <div className="flex gap-2 mt-3">
@@ -25,8 +28,8 @@ export default function OrderProductCard({ product, onAdd }: any) {
             onClick={() => setSelectedSku(v.sku)}
             className={`px-3 py-1 border rounded-full text-sm ${
               selectedSku === v.sku
-                ? "bg-black text-white"
-                : "bg-white text-gray-700"
+                        ? "bg-black text-white dark:bg-white dark:text-black"
+              : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200"
             }`}
           >
             {v.size}เหลือ{v.stock} {v.price} ฿
@@ -36,11 +39,11 @@ export default function OrderProductCard({ product, onAdd }: any) {
 
       {/* Qty */}
       <div className="mt-3 flex gap-2 items-center">
-        <label className="text-sm">จำนวน:</label>
+        <label className="text-sm text-gray-700 dark:text-gray-300">จำนวน:</label>
         <input
           type="number"
           min={1}
-          className="w-20 p-1 border rounded"
+          className="w-20 p-1 border rounded bg-white dark:bg-gray-700 text-black dark:text-white"
           value={qty}
           onChange={(e) => setQty(Number(e.target.value))}
         />
@@ -63,8 +66,14 @@ export default function OrderProductCard({ product, onAdd }: any) {
             name: product.name,
           });
         }}
-        className="mt-4 w-full flex items-center justify-center gap-2 bg-black text-white px-3 py-2 rounded-lg hover:bg-gray-900 disabled:bg-gray-300"
-      >
+          className={`
+      mt-4 w-full flex items-center justify-center gap-2 
+      px-3 py-2 rounded-lg transition
+      ${selectedSku 
+        ? "bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-200" 
+        : "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"}
+    `}
+  >
         <ShoppingCart size={18} />
         เพิ่มลงตะกร้า
       </button>
