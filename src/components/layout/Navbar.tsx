@@ -1,27 +1,37 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation'; // Import usePathname
+import { isAuthenticated, clearAuth } from '../../lib/authUtils';
 
 const Navbar = () => {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname(); // Get current pathname
+  const [isClient, setIsClient] = useState(false);
+  const [loggedInStatus, setLoggedInStatus] = useState(false);
 
   useEffect(() => {
-    const userIsLoggedIn = localStorage.getItem('loggedIn') === 'true';
-    if (userIsLoggedIn) {
-      setLoggedIn(true);
-    }
+    setIsClient(true);
+    // Update loggedInStatus when component mounts or pathname changes
+    setLoggedInStatus(isAuthenticated());
+  }, [pathname]); // Add pathname as a dependency
+
+  // Listen for storage changes to update login status across tabs/windows
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setLoggedInStatus(isAuthenticated());
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('loggedIn');
-    setLoggedIn(false);
-  };
 
-  const handleLogin = () => {
-    // ในหน้า Login จริงๆ หลังจาก Login สำเร็จให้ใช้ localStorage.setItem('loggedIn', 'true');
-    // นี่เป็นแค่การจำลอง
-    localStorage.setItem('loggedIn', 'true');
-    setLoggedIn(true);
+  const handleLogout = () => {
+    clearAuth();
+    setLoggedInStatus(false); // Update state immediately
+    router.push('/user_auth/login'); // Redirect to login page after logout
   };
 
   return (
@@ -40,7 +50,7 @@ const Navbar = () => {
               ประวัติการสั่งซื้อ
             </Link>
           </div>
-          {loggedIn ? (
+          {isClient && loggedInStatus ? (
             <button onClick={handleLogout} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
               Logout
             </button>

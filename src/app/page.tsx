@@ -107,7 +107,7 @@ export default function HomePage() {
               <p className="py-6 text-xl text-base-content/90">
                 พร้อมส่งตรงถึงบ้านคุณ เสื้อยืดคุณภาพเยี่ยม ดีไซน์ทันสมัย อย่าพลาด!
               </p>
-              <Link href="/shop" className="btn btn-secondary btn-lg shadow-xl hover:scale-105 transition duration-300">
+              <Link href="/order" className="btn btn-secondary btn-lg shadow-xl hover:scale-105 transition duration-300">
                 ช้อปเลย! 🚀
               </Link>
             </div>
