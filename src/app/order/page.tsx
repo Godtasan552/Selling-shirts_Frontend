@@ -79,7 +79,8 @@ export default function OrderPage() {
         return;
       }
 
-      window.location.href = `/order/uploadslip?id=${orderId}`;
+      window.location.href = `/order/uploadslip?id=${orderId}&total=${grandTotal}&shipping=${shippingCost}&subtotal=${subtotal}`;
+
     } else {
       alert("เกิดข้อผิดพลาดในการสร้าง Order");
     }
