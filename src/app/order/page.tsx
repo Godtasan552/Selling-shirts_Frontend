@@ -47,14 +47,14 @@ export default function OrderPage() {
     console.log("RESPONSE CREATE ORDER =>", res);
 
     if (res.status === 201 || res.status === 200) {
-        const orderId = (res as any).order?._id;
+        const orderId = res.data?.order?._id;
 
   if (!orderId) {
     alert("ไม่พบ Order ID จาก API");
     return;
   }
 
-  window.location.href = `/order/upload-slip?id=${orderId}`;
+  window.location.href = `/order/uploadslip?id=${orderId}`;
 } else {
   alert("เกิดข้อผิดพลาดในการสร้าง Order");
 }
