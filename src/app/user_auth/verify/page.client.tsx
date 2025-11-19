@@ -1,4 +1,4 @@
-"use client"; // ทำให้ทั้งหน้าเป็น Client Component
+"use client";
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -8,9 +8,9 @@ import ErrorText from "@/components/auth_user/ErrorText";
 import { post } from "@/lib/authApi";
 
 export default function VerifyOTPPage() {
-  const params = useSearchParams(); // ✅ ตอนนี้เรียกตรงนี้ถูกแล้ว
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+  const params = useSearchParams();
   const phone = params.get("phone") || "";
   const otpFromRegister = params.get("otp") || "";
 
@@ -19,7 +19,6 @@ export default function VerifyOTPPage() {
   const [resendMsg, setResendMsg] = useState("");
   const [timer, setTimer] = useState(60);
 
-  // Countdown timer
   useEffect(() => {
     if (timer <= 0) return;
     const timeout = setTimeout(() => setTimer(prev => prev - 1), 1000);
@@ -28,8 +27,11 @@ export default function VerifyOTPPage() {
 
   const handleVerify = async () => {
     const res = await post(`${API_URL}/auth/verify-otp`, { phone, otp });
-    if (res.status === 200) window.location.href = "/user_auth/login";
-    else setError((res.data?.message as string) || "OTP ไม่ถูกต้อง");
+    if (res.status === 200) {
+      window.location.href = "/user_auth/login";
+    } else {
+      setError(res.data?.message as string || "OTP ไม่ถูกต้อง");
+    }
   };
 
   const handleResend = async () => {
@@ -40,7 +42,7 @@ export default function VerifyOTPPage() {
       setResendMsg("ส่ง OTP ใหม่แล้ว");
       setTimer(60);
     } else {
-      setError((res.data?.message as string) || "ส่ง OTP ไม่สำเร็จ");
+      setError(res.data?.message as string || "ส่ง OTP ไม่สำเร็จ");
     }
   };
 
@@ -51,14 +53,11 @@ export default function VerifyOTPPage() {
       <p className="text-gray-500 mb-3">OTP (debug): {otp}</p>
 
       <p className="text-gray-500 mb-3">
-        {timer > 0 ? (
-          <>ขอ OTP ใหม่ได้ใน <span className="font-semibold">{timer}</span> วินาที</>
-        ) : (
-          <span className="text-green-600">สามารถขอ OTP ใหม่ได้แล้ว</span>
-        )}
+        {timer > 0 ? <>ขอ OTP ใหม่ได้ใน <span className="font-semibold">{timer}</span> วินาที</> :
+        <span className="text-green-600">สามารถขอ OTP ใหม่ได้แล้ว</span>}
       </p>
 
-      <Input label="OTP" type="text" value={otp} onChange={e => setOtp(e.target.value)} />
+      <Input label="OTP" type="text" value={otp} onChange={(e) => setOtp(e.target.value)} />
       {error && <ErrorText message={error} />}
       {resendMsg && <p className="text-green-500">{resendMsg}</p>}
 
