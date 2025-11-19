@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { phoneRegex } from "@/utils/phoneregex";
 import Input from "@/components/auth_user/Input";
@@ -12,14 +11,12 @@ import Image from "next/image";
 interface LoginResponse {
   message?: string;
   token?: string;
-  [key: string]: unknown; // <-- เพิ่มบรรทัดนี้
+  [key: string]: unknown;
 }
-
 
 export default function LoginPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const GOOGLE_URL = `${API_URL}/auth/google/redirect`;
-
   const [phone, setPhone] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -30,7 +27,7 @@ export default function LoginPage() {
       return;
     }
 
-    const res = await post<{ phone: string; password: string }, LoginResponse>(
+    const res = await post<LoginResponse>(
       `${API_URL}/auth/login`,
       { phone, password }
     );
@@ -54,23 +51,19 @@ export default function LoginPage() {
       <h1 className="text-xl font-bold mb-4 flex items-center gap-2">
         <LogIn /> Login
       </h1>
-
       <Input
         label="Phone Number"
         type="text"
         value={phone}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
       />
-
       <Input
         label="Password"
         type="password"
         value={password}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
       />
-
       {error && <ErrorText message={error} />}
-
       <Button onClick={handleLogin}>Login</Button>
 
       {/* Divider */}
