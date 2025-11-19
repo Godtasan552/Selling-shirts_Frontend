@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // <-- เพิ่มตรงนี้
 import OrderProductCard from "@/components/user/productCard";
 import { post } from "@/lib/authApi";
 import { Receipt, Send, Trash2 } from "lucide-react";
@@ -57,6 +58,8 @@ interface ApiResponse {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function Page() {
+  const router = useRouter(); // <-- เพิ่มตรงนี้
+
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -169,7 +172,18 @@ export default function Page() {
           <div className="p-3 rounded-2xl bg-gradient-to-br from-pink-200 to-rose-200">
             <Receipt size={24} className="text-pink-600" />
           </div>
-          <h1 className="text-3xl font-light text-gray-700 tracking-wide">สั่งซื้อสินค้า</h1>
+          <h1 className="text-3xl font-light text-gray-700 tracking-wide flex-1">
+            สั่งซื้อสินค้า
+          </h1>
+
+          {/* ปุ่มกลับหน้าแรก */}
+          <button
+            onClick={() => router.push("/")}
+            className="p-2 rounded-lg bg-red-300 hover:bg-gray-300 transition text-gray-700"
+            title="หน้าแรก"
+          >
+            หน้าแรก
+          </button>
         </div>
 
         {/* Products Grid */}
