@@ -1,4 +1,22 @@
-export const post = async (url: string, body: any) => {
+// lib/authApi.ts
+
+// ✅ Define response types
+interface ApiResponseData {
+  message?: string;
+  token?: string;
+  [key: string]: unknown; // สำหรับ properties อื่นๆ
+}
+
+interface ApiResponse<T = ApiResponseData> {
+  status: number;
+  data: T;
+}
+
+// ✅ Define types for post function
+export const post = async <T = ApiResponseData>(
+  url: string,
+  body: Record<string, unknown>
+): Promise<ApiResponse<T>> => {
   try {
     const response = await fetch(url, {
       method: "POST",
@@ -12,33 +30,47 @@ export const post = async (url: string, body: any) => {
     const data = await response.json();
     return {
       status: response.status,
-      data, // { message: "...", token: "..." }
+      data,
     };
   } catch (error) {
     return {
       status: 500,
-      data: { message: "Server Error" },
+      data: { message: "Server Error" } as T,
     };
   }
 };
-export async function authGetCookie(url: string) {
+
+// ✅ Define types for authGetCookie
+export async function authGetCookie<T = ApiResponseData>(
+  url: string
+): Promise<ApiResponse<T>> {
   const res = await fetch(url, {
     method: "GET",
-    credentials: "include", // ใช้ cookie เท่านั้น
+    credentials: "include",
     cache: "no-store",
   });
 
   const data = await res.json();
-  return { status: res.status, ...data };
+  return { status: res.status, data } as ApiResponse<T>;
 }
- 
-export async function authGet(url: string) {
+
+// ✅ Define types for authGet
+export async function authGet<T = ApiResponseData>(
+  url: string
+): Promise<ApiResponse<T>> {
   // 1) พยายามดึง token จาก cookie ก่อน
-  let token =
-    document.cookie
+  let token: string | undefined;
+  
+  try {
+    token = document
+      .cookie
       .split("; ")
       .find((c) => c.startsWith("auth_token="))
       ?.split("=")[1];
+  } catch (e) {
+    // Server component ไม่มี document object
+    token = undefined;
+  }
 
   // 2) ถ้าไม่มีใน cookie → fallback ไป localStorage
   if (!token) {
@@ -59,10 +91,13 @@ export async function authGet(url: string) {
   const res = await fetch(url, {
     method: "GET",
     headers,
-    credentials: "include", // แนะนำให้ใส่ เพื่อรองรับ cookie-based auth
+    credentials: "include",
     cache: "no-store",
   });
 
   const data = await res.json();
-  return { status: res.status, ...data };
+  return { status: res.status, data } as ApiResponse<T>;
 }
+
+// ✅ Optional: Export helper types for use in components
+export type { ApiResponse, ApiResponseData };
