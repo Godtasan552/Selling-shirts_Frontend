@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect } from "react";
@@ -9,31 +8,19 @@ export default function GoogleCallback() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
-    async function fetchToken() {
-      try {
-        const res = await fetch(`${API_URL}/auth/google/token`, {
-          method: "GET",
-          credentials: "include",
-        });
-        
-        const data = await res.json();
-        if (data.token) {
-          localStorage.setItem("auth_token", data.token);
-          router.push("/history");
-        } else {
-          router.push("/user_auth/login");
-        }
-      } catch (error) {
-        router.push("/user_auth/login");
-      }
+    async function checkLogin() {
+      const res = await fetch(`${API_URL}/auth/me`, {
+        method: "GET",
+        credentials: "include"
+      });
+      const data = await res.json();
+
+      if (data.authenticated) router.push("/history");
+      else router.push("/user_auth/login");
     }
 
-    fetchToken();
+    checkLogin();
   }, []);
 
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <p>กำลังเข้าสู่ระบบด้วย Google...</p>
-    </div>
-  );
+  return <p>กำลังเข้าสู่ระบบด้วย Google...</p>;
 }
