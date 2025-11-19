@@ -41,7 +41,9 @@ type LoadingState = 'idle' | 'loading' | 'success' | 'error';
 // ==================== Constants ====================
 const CONFIG = {
   SIZE_ORDER: ['SSS', 'SS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', '6XL', '7XL', '8XL', '9XL', '10XL'] as const,
-  API_ENDPOINT: process.env.NEXT_PUBLIC_API_URL || 'NEXT_PUBLIC_API_URL',
+  API_ENDPOINT: process.env.NEXT_PUBLIC_API_URL
+    ? process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '') // ลบ / ข้างหลัง
+    : 'http://localhost:5000',
   CAROUSEL_INTERVAL: 6000,
   FALLBACK_IMAGE: '/shirt_mourning.jpg',
   PRODUCT_PRICE: '฿195',
