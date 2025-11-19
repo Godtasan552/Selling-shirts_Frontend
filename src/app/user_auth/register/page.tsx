@@ -35,9 +35,11 @@ export default function RegisterPage() {
     });
 
     if (res.status === 200 || res.status === 201) {
-          router.push(`/user_auth/verify?phone=${res.phone}&otp=${res.otp}`);
+          router.push(`/user_auth/verify?phone=${res.data.phone}&otp=${res.data.otp}`);
+
     } else {
-      setError(res.message || "เกิดข้อผิดพลาด");
+      setError(res.data?.message || "เกิดข้อผิดพลาด");
+
     }
   };
   const handleGoogleSignup = () => {
@@ -54,14 +56,16 @@ export default function RegisterPage() {
         label="Phone Number"
         type="text"
         value={phone}
-        onChange={(e: any) => setPhone(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
+
       />
 
       <Input
         label="Password"
         type="password"
         value={password}
-        onChange={(e: any) => setPassword(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
+
       />
 
       {error && <ErrorText message={error} />}
