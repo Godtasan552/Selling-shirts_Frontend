@@ -26,16 +26,10 @@ export const post = async <T = ApiResponseData>(
     });
 
     const data = await response.json();
-    return {
-      status: response.status,
-      data,
-    };
+    return { status: response.status, data } as ApiResponse<T>;
   } catch (error) {
     console.error("POST API Error:", error);
-    return {
-      status: 500,
-      data: { message: "Server Error" } as T,
-    };
+    return { status: 500, data: { message: "Server Error" } as T };
   }
 };
 
