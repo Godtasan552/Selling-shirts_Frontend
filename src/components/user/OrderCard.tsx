@@ -1,44 +1,86 @@
 "use client";
 
-import { Package, Truck, Clock, CheckCircle } from "lucide-react";
+import { Package, Truck, Clock, CheckCircle, LucideIcon } from "lucide-react";
 
-const statusStyles: any = {
-  pending_payment: { icon: Clock, color: "text-yellow-500", label: "รอชำระเงิน" },
-  verifying_payment: { icon: Clock, color: "text-blue-500", label: "รอตรวจสอบ" },
-  shipping: { icon: Truck, color: "text-purple-500", label: "กำลังจัดส่ง" },
-  paid: { icon: Package, color: "text-green-500", label: "ชำระเงินแล้ว" },
-  completed: { icon: CheckCircle, color: "text-emerald-600", label: "สำเร็จ" },
+// ✅ Define Status Type
+type OrderStatus = "pending_payment" | "verifying_payment" | "shipping" | "paid" | "completed";
+
+interface StatusStyle {
+  icon: LucideIcon;
+  color: string;
+  label: string;
+}
+
+interface Order {
+  _id: string;
+  status: OrderStatus;
+  createdAt: string;
+  shippingCost?: number;
+  customerAddress?: string;
+  totalPrice: number;
+}
+
+// ✅ Type the statusStyles object
+const statusStyles: Record<OrderStatus, StatusStyle> = {
+  pending_payment: { 
+    icon: Clock, 
+    color: "text-yellow-500", 
+    label: "รอชำระเงิน" 
+  },
+  verifying_payment: { 
+    icon: Clock, 
+    color: "text-blue-500", 
+    label: "รอตรวจสอบ" 
+  },
+  shipping: { 
+    icon: Truck, 
+    color: "text-purple-500", 
+    label: "กำลังจัดส่ง" 
+  },
+  paid: { 
+    icon: Package, 
+    color: "text-green-500", 
+    label: "ชำระเงินแล้ว" 
+  },
+  completed: { 
+    icon: CheckCircle, 
+    color: "text-emerald-600", 
+    label: "สำเร็จ" 
+  },
 };
 
-export default function OrderCard({ order }: any) {
-  const StatusIcon = statusStyles[order.status]?.icon;
-  const statusColor = statusStyles[order.status]?.color;
-  const statusLabel = statusStyles[order.status]?.label;
+interface OrderCardProps {
+  order: Order;
+}
+
+export default function OrderCard({ order }: OrderCardProps) {
+  const statusStyle = statusStyles[order.status];
+  const StatusIcon = statusStyle?.icon;
+  const statusColor = statusStyle?.color;
+  const statusLabel = statusStyle?.label;
+
+  if (!statusStyle) {
+    return <div>Unknown status: {order.status}</div>;
+  }
 
   return (
-    <div
-      className="
-        p-4 rounded-lg border shadow hover:shadow-lg transition bg-white
-        animate__animated animate__fadeInUp animate__faster
-      "
-    >
-      <div className="flex items-center justify-between">
-        <h3 className="font-bold text-lg">Order #{order._id.slice(-6)}</h3>
-
-        <span className={`flex items-center gap-1 ${statusColor}`}>
-          <StatusIcon size={18} /> {statusLabel}
+    <div className="p-5 rounded-2xl bg-white/60 backdrop-blur border border-white/50 shadow-md hover:shadow-lg transition-all">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-light text-lg text-gray-700">Order #{order._id.slice(-6)}</h3>
+        <span className={`flex items-center gap-1 text-sm font-medium ${statusColor}`}>
+          <StatusIcon size={16} />
+          {statusLabel}
         </span>
       </div>
 
-      <div className="mt-2 text-sm text-gray-600">
-        <p>วันที่สั่งซื้อ: {new Date(order.createdAt).toLocaleString()}</p>
-        {/* ค่าจัดส่ง */}
-        <p>ค่าจัดส่ง: {order.shippingCost?.toLocaleString()} บาท</p>
-        <p>จัดส่งที่: {order.customerAddress?.toLocaleString()} </p>
-        {/* ใช้ totalPrice แทน total */}
-        <p>ยอดรวม: {order.totalPrice.toLocaleString()} บาท</p>
+      <div className="space-y-2 text-sm text-gray-600 font-light">
+        <p>วันที่สั่งซื้อ: {new Date(order.createdAt).toLocaleString("th-TH")}</p>
+        <p>ค่าจัดส่ง: {order.shippingCost?.toLocaleString("th-TH")} บาท</p>
+        <p>จัดส่งที่: {order.customerAddress}</p>
+        <p className="font-semibold text-gray-800">
+          ยอดรวม: {order.totalPrice.toLocaleString("th-TH")} บาท
+        </p>
       </div>
     </div>
   );
 }
-

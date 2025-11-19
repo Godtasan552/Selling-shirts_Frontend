@@ -8,12 +8,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
-        pathname: '/**', // ครอบคลุมทุก path ของ Cloudinary
+        pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: '*.cloudinary.com',
-        pathname: '/**', // ครอบคลุมทุก subdomain
+        pathname: '/**',
       },
       // รองรับ Google images
       {
@@ -21,14 +21,40 @@ const nextConfig: NextConfig = {
         hostname: 'developers.google.com',
         pathname: '/identity/images/**',
       },
-      // รองรับ placeholder เก่า
+      // รองรับ placeholder
       {
         protocol: 'https',
         hostname: 'placehold.co',
         pathname: '/**',
       },
+      // รองรับ example.com (API images)
+      {
+        protocol: 'https',
+        hostname: 'example.com',
+        pathname: '/**',
+      },
+      // รองรับ wildcard สำหรับ subdomains ใดๆ
+      {
+        protocol: 'https',
+        hostname: '**.example.com',
+        pathname: '/**',
+      },
+      // รองรับ localhost สำหรับ development
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        pathname: '/**',
+      },
+      
     ],
   },
 };
+
+
 
 export default nextConfig;
