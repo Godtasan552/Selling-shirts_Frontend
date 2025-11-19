@@ -30,10 +30,11 @@ export default function LoginPage() {
       return;
     }
 
-    const res = await post<{ phone: string; password: string }, LoginResponse>(
-      `${API_URL}/auth/login`,
-      { phone, password }
-    );
+const res = await post<LoginResponse>(
+  `${API_URL}/auth/login`,
+  { phone, password }
+);
+
 
     if (res.status === 200) {
       if (res.data?.token) {
