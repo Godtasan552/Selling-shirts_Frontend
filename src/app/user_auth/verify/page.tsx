@@ -8,30 +8,28 @@ import ErrorText from "@/components/auth_user/ErrorText";
 import { post } from "@/lib/authApi";
 
 export default function VerifyOTPPage() {
-    const params = useSearchParams();
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-    const phone = params.get("phone") || "";
-    const otpFromRegister = params.get("otp") || "";
+    // ✅ เรียก hook ที่ top-level
+    const searchParams = useSearchParams();
+    const phoneParam = searchParams.get("phone") || "";
+    const otpParam = searchParams.get("otp") || "";
 
-    const [otp, setOtp] = useState<string>(otpFromRegister);
+    const [phone] = useState(phoneParam);
+    const [otp, setOtp] = useState(otpParam);
     const [error, setError] = useState<string>("");
     const [resendMsg, setResendMsg] = useState<string>("");
     const [timer, setTimer] = useState<number>(60);
 
+    // Countdown timer
     useEffect(() => {
         if (timer <= 0) return;
-        const timeout = setTimeout(() => {
-            setTimer((prev) => prev - 1);
-        }, 1000);
+        const timeout = setTimeout(() => setTimer((prev) => prev - 1), 1000);
         return () => clearTimeout(timeout);
     }, [timer]);
 
     const handleVerify = async () => {
-        const res = await post(`${API_URL}/auth/verify-otp`, {
-            phone,
-            otp,
-        });
+        const res = await post(`${API_URL}/auth/verify-otp`, { phone, otp });
 
         if (res.status === 200) {
             window.location.href = "/user_auth/login";
@@ -72,9 +70,7 @@ export default function VerifyOTPPage() {
                 label="OTP"
                 type="text"
                 value={otp}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setOtp(e.target.value)
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOtp(e.target.value)}
             />
 
             {error && <ErrorText message={error} />}
@@ -84,10 +80,7 @@ export default function VerifyOTPPage() {
                 Verify
             </Button>
 
-            <button
-                className="mt-3 text-blue-600 underline"
-                onClick={handleResend}
-            >
+            <button className="mt-3 text-blue-600 underline" onClick={handleResend}>
                 Resend OTP
             </button>
         </div>
